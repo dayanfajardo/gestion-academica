@@ -44,21 +44,79 @@ El sistema utiliza una arquitectura basada en **microservicios**, donde cada ser
 
 ---
 
-# 🗄️ Modelo de Datos y Dominio
+# Modelo de Datos y Dominio
 
-Cada microservicio administra una entidad principal dentro del dominio académico.
+### 1. Servicio de Docentes (`docentes-service`)
 
-| Microservicio             | Entidad      | Atributos principales                                               | Descripción                                               |
-| :------------------------ | :----------- | :------------------------------------------------------------------ | :-------------------------------------------------------- |
-| **`docentes-service`**    | `docente`    | `id` (PK), `cedula`, `nombre`, `correo`, `departamento`, `genero`   | Registro y gestión del cuerpo docente.                    |
-| **`cursos-service`**      | `curso`      | `id` (PK), `codigo`, `nombre`, `creditos`, `semestre`, `docente_id` | Catálogo de asignaturas académicas y docente responsable. |
-| **`estudiantes-service`** | `estudiante` | `id` (PK), `cedula`, `nombre`, `correo`, `carrera`                  | Registro y gestión de los estudiantes.                    |
-| **`matriculas-service`**  | `matricula`  | `id` (PK), `estudiante_id`, `curso_id`, `fecha`                     | Gestión de la inscripción de estudiantes en cursos.       |
-| **`notas-service`**       | `nota`       | `id` (PK), `matricula_id`, `calificacion`, `porcentaje`             | Registro y seguimiento de las calificaciones académicas.  |
+**Tabla:** `docente`
 
-> **Nota:** Las relaciones entre microservicios se manejan mediante identificadores (`ID`) y comunicación a través de APIs. No se utilizan claves foráneas físicas entre bases de datos pertenecientes a diferentes microservicios.
+| Campo | Tipo de Dato | Restricciones / Reglas |
+| --- | --- | --- |
+| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
+| `cedula` | `VARCHAR(20)` | `NOT NULL`, `UNIQUE` |
+| `nombre` | `VARCHAR(100)` | `NOT NULL` |
+| `correo` | `VARCHAR(100)` | `NOT NULL`, `UNIQUE` |
+| `departamento` | `VARCHAR(100)` | `NOT NULL` |
+| `genero` | `VARCHAR(20)` | Opcional |
 
 ---
+
+### 2. Servicio de Cursos (`cursos-service`)
+
+**Tabla:** `curso`
+
+| Campo | Tipo de Dato | Restricciones / Reglas |
+| --- | --- | --- |
+| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
+| `codigo` | `VARCHAR(20)` | `NOT NULL`, `UNIQUE` |
+| `nombre` | `VARCHAR(100)` | `NOT NULL` |
+| `creditos` | `INTEGER` | `NOT NULL` |
+| `semestre` | `INTEGER` | `NOT NULL` |
+| `docente_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
+
+---
+
+### 3. Servicio de Estudiantes (`estudiantes-service`)
+
+**Tabla:** `estudiante`
+
+| Campo | Tipo de Dato | Restricciones / Reglas |
+| --- | --- | --- |
+| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
+| `cedula` | `VARCHAR(20)` | `NOT NULL`, `UNIQUE` |
+| `nombre` | `VARCHAR(100)` | `NOT NULL` |
+| `correo` | `VARCHAR(100)` | `NOT NULL`, `UNIQUE` |
+| `programa` | `VARCHAR(100)` | `NOT NULL` |
+
+---
+
+### 4. Servicio de Matrículas (`matriculas-service`)
+
+**Tabla:** `matricula`
+
+| Campo | Tipo de Dato | Restricciones / Reglas |
+| --- | --- | --- |
+| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
+| `estudiante_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
+| `curso_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
+| `anio` | `INTEGER` | `NOT NULL` (Año lectivo) |
+| `periodo` | `VARCHAR(10)` | `NOT NULL` (Ej: '1', '2', '2026-1') |
+
+---
+
+### 5. Servicio de Notas (`notas-service`)
+
+**Tabla:** `nota`
+
+| Campo | Tipo de Dato | Restricciones / Reglas |
+| --- | --- | --- |
+| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
+| `matricula_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
+| `calificacion` | `NUMERIC(3,2)` | `NOT NULL` (Ej: 4.50) |
+| `observacion` | `VARCHAR(200)` | Opcional |
+
+---
+
 
 # Relaciones del Sistema
 
