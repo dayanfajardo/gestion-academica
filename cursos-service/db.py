@@ -1,5 +1,6 @@
-import os   
+import os
 import psycopg2
+
 
 def connect_db():
     return psycopg2.connect(
@@ -7,5 +8,5 @@ def connect_db():
         database=os.getenv('DB_NAME'),
         user=os.getenv('DB_USER'),
         password=os.getenv('DB_PASSWORD'),
-        port=os.getenv('DB_PORT', 5432)
+        port=os.getenv('DB_PORT', 5433)
     )

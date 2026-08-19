@@ -66,7 +66,7 @@ def create_new_teacher(data):
     
     sql = """
         INSERT INTO docente (cedula, nombre, correo, departamento, genero) 
-        VALUES (%s, %s, %s, %s, %s)",
+        VALUES (%s, %s, %s, %s, %s)"
     """
     
     cursor.execute(sql, (
