@@ -66,7 +66,7 @@ def create_new_teacher(data):
     
     sql = """
         INSERT INTO docente (cedula, nombre, correo, departamento, genero) 
-        VALUES (%s, %s, %s, %s, %s)"
+        VALUES (%s, %s, %s, %s, %s)
     """
     
     cursor.execute(sql, (
@@ -84,8 +84,7 @@ def create_new_teacher(data):
 #* 4. Actualizar docente
     # Esta función recibe dos parámetros:
     # teacher_id -> el ID del docente que queremos actualizar.
-    # data -> contiene los nuevos datos del docente,
-    #         normalmente en forma de diccionario.
+    # data -> contiene los nuevos datos del docente,    
     #"Voy a crear una función llamada update_teacher_by_id que necesita recibir dos datos."
 def update_teacher_by_id(teacher_id, data):
     

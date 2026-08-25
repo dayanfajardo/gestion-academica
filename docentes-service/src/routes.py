@@ -7,6 +7,7 @@ from src.services import (
     delete_teacher_by_id
 )
 
+#* Ojo para estudiar, blueprint('docentes') -> nombre interno esto es para flask, para identificar la url
 docentes_bp = Blueprint('docentes', __name__)
 
 @docentes_bp.route('/docentes', methods=['GET'])
