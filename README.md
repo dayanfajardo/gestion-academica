@@ -67,7 +67,101 @@ Se eligió una arquitectura basada en microservicios porque, aunque el sistema n
 No se escogió una arquitectura en capas porque, al estar todo más centralizado, sería necesario escalar gran parte del sistema aunque solo una sección tuviera mucha carga. Tampoco se eligió una arquitectura completamente basada en eventos, porque agregaría una complejidad de comunicación y mensajería que no es necesaria para un sistema donde la mayoría de las operaciones son CRUD. Finalmente, se descartó el modelo cliente-servidor tradicional porque no permite tener tanta independencia para desplegar y manejar cada parte del sistema por separado   
 
 ## Base de datos
-...
+### ¿Qué información debe guardarse?
+
+A continuación se presentan los datos que necesitamos para cada microservicio:
+
+- **Docentes**: Id, cédula (identificación única), nombre, correo institucional, departamento, género (opcional).
+- **Cursos**: Id, código único, nombre, número de créditos, semestre, y el `docente_id` que lo dicta.
+- **Estudiantes**: Id, cédula, nombre, correo institucional, programa académico.
+- **Matrículas**: Id, `estudiante_id`, `curso_id`, año lectivo, periodo.
+- **Notas**: Id, `matricula_id`, calificación, observación opcional.
+
+### 1. Servicio de Docentes (`docentes-service`)
+**Tabla:** `docente`
+
+| Campo | Tipo de Dato | Restricciones / Reglas |
+| --- | --- | --- |
+| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
+| `cedula` | `VARCHAR(20)` | `NOT NULL`, `UNIQUE` |
+| `nombre` | `VARCHAR(100)` | `NOT NULL` |
+| `correo` | `VARCHAR(100)` | `NOT NULL`, `UNIQUE` |
+| `departamento` | `VARCHAR(100)` | `NOT NULL` |
+| `genero` | `VARCHAR(20)` | Opcional |
+
+---
+
+### 2. Servicio de Cursos (`cursos-service`)
+
+**Tabla:** `curso`
+
+| Campo | Tipo de Dato | Restricciones / Reglas |
+| --- | --- | --- |
+| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
+| `codigo` | `VARCHAR(20)` | `NOT NULL`, `UNIQUE` |
+| `nombre` | `VARCHAR(100)` | `NOT NULL` |
+| `creditos` | `INTEGER` | `NOT NULL` |
+| `semestre` | `INTEGER` | `NOT NULL` |
+| `docente_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
+
+---
+
+### 3. Servicio de Estudiantes (`estudiantes-service`)
+
+**Tabla:** `estudiante`
+
+| Campo | Tipo de Dato | Restricciones / Reglas |
+| --- | --- | --- |
+| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
+| `cedula` | `VARCHAR(20)` | `NOT NULL`, `UNIQUE` |
+| `nombre` | `VARCHAR(100)` | `NOT NULL` |
+| `correo` | `VARCHAR(100)` | `NOT NULL`, `UNIQUE` |
+| `programa` | `VARCHAR(100)` | `NOT NULL` |
+
+---
+
+### 4. Servicio de Matrículas (`matriculas-service`)
+
+**Tabla:** `matricula`
+
+| Campo | Tipo de Dato | Restricciones / Reglas |
+| --- | --- | --- |
+| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
+| `estudiante_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
+| `curso_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
+| `anio` | `INTEGER` | `NOT NULL` (Año lectivo) |
+| `periodo` | `VARCHAR(10)` | `NOT NULL` (Ej: '1', '2', '2026-1') |
+
+---
+
+### 5. Servicio de Notas (`notas-service`)
+
+**Tabla:** `nota`
+
+| Campo | Tipo de Dato | Restricciones / Reglas |
+| --- | --- | --- |
+| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
+| `matricula_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
+| `calificacion` | `NUMERIC(3,2)` | `NOT NULL` (Ej: 4.50) |
+| `observacion` | `VARCHAR(200)` | Opcional |
+
+
+### ¿Qué datos son críticos?
+
+1. **Cédula** (docente y estudiante): Es único y no editable; identifica legalmente a la persona. Si se duplica o se pierde, se rompe la trazabilidad académica.
+2. **docente_id** (Curso): Sin este dato, un curso queda sin responsable.
+3. **estudiante_id y curso_id** (Matrícula): Son las llaves lógicas que conectan nuestro sistema; perder esto rompe la relación estudiante-curso.
+4. **matricula_id** (Nota): Sin este vínculo, una calificación queda sin dueño.
+5. **Calificación**: Es el dato final que certifica el rendimiento académico.
+
+### ¿Qué pasaría si se pierden?
+
+Al tener bases de datos separadas, la pérdida de algún dato no necesariamente tumba los demás servicios, pero sí se pueden presentar inconsistencias en la lógica de nuestro sistema, por ejemplo:
+
+1. **Se pierden Docentes**: Los cursos quedan con un `docente_id` que ya no existe.
+2. **Se pierden Estudiantes**: Las matrículas quedan con `estudiante_id` huérfanos.
+3. **Se pierden Cursos**: El estudiante tiene una nota, pero no se podría saber en qué materia.
+4. **Se pierden Notas**: Se pierde el historial académico.
 
 ## Usuarios del sistema
 ...
