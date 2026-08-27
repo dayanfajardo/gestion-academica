@@ -33,31 +33,6 @@ Cada microservicio es independiente en su desarrollo porque tiene su propia base
 - El proceso de **modelado de base de datos** de cada uno de ellos es independiente y no existe un bloqueo mutuo.
 - El proceso de **pruebas** para cada microservicio se puede dar de manera aislada e independiente.
 
-```text
-                         ┌─────────────────────┐
-                         │       Cliente       │
-                         │  Frontend / Postman │
-                         └──────────┬──────────┘
-                                    │
-                                    │ HTTP
-                                    ▼
-                         ┌─────────────────────┐
-                         │      API Gateway    │
-                         └──────────┬──────────┘
-                                    │
-             ┌──────────────────────┼──────────────────────┐
-             │           │          │          │           │
-             ▼           ▼          ▼          ▼           ▼
-        ┌─────────┐ ┌─────────┐ ┌───────────┐ ┌──────────┐ ┌─────────┐
-        │Docentes │ │ Cursos  │ │Estudiante │ │Matrículas│ │  Notas  │
-        │ Service │ │ Service │ │ Service   │ | Service  │ │ Service │
-        └────┬────┘ └────┬────┘ └────┬──────┘ └────┬─────┘ └────┬────┘
-             │           │           │             │            │
-             ▼           ▼           ▼             ▼            ▼
-        PostgreSQL  PostgreSQL   PostgreSQL   PostgreSQL     PostgreSQL
-
-
-```
 ## Comunicación entre servicios
 ...
 
