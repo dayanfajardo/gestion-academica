@@ -167,4 +167,21 @@ Al tener bases de datos separadas, la pérdida de algún dato no necesariamente 
 ...
 
 ## Riesgos y fallas posibles
-...
+### Fallas en un servicio (ejemplo: servicio de Notas)
+
+Si se presentan fallas, por ejemplo, en el servicio de Notas, las demás funcionalidades (matricular, consultar docentes/cursos) siguen funcionando, pero cualquier operación que dependa de Notas (consultar calificaciones) fallará: el Gateway enruta la petición, pero no se obtendría respuesta.
+
+**Solución:**
+
+- Implementar un endpoint `/health` en cada servicio; de esta forma el Gateway sabrá qué servicios se encuentran disponibles.
+- Si el servicio se está reiniciando y no está caído, se necesitaría la implementación de **reintentos exponenciales**, en donde se esperaría cada vez más tiempo entre cada intento fallido de conexión.
+
+### Fallas en la base de datos
+
+Si hay fallos en la base de datos se generarían inconsistencias en la lógica de nuestro sistema, ya que se pierden referencias a datos que se encuentran en las demás bases de datos.
+
+**Solución:**
+
+- Implementar backups automáticos y periódicos.
+- Réplicas de lectura en los servicios más consultados, de modo que si la instancia principal falla pueda responder una réplica.
+- Monitorear los recursos de nuestras bases de datos (conexiones activas, espacio en disco, etc.) para detectar problemas antes de que se vuelvan caídas totales.
