@@ -1,5 +1,3 @@
-# gestion-academica
-
 # Arquitectura del Sistema: Sistema Académico Distribuido
 
 ```text
