@@ -17,11 +17,21 @@ Sin este sistema, la institución tendría que depender de procesos manuales o h
 ## Servicios del sistema
 Los principales servicios del sistema de gestión académica son:
 
-* Docentes
-* Cursos
-* Estudiantes
-* Matrículas
-* Notas
+1. **Docentes**: Gestiona la información de los profesores: cédula, nombre, correo, departamento y género. Es el punto de partida de la relación académica, ya que cada curso depende de un docente responsable.
+2. **Cursos**: Administra los cursos ofrecidos (código, nombre, créditos, semestre).
+3. **Estudiantes**: Gestiona los datos de los estudiantes matriculados en el sistema: cédula, nombre, correo y programa académico al que pertenecen.
+4. **Matrículas**: Gestiona la matrícula que hacen los estudiantes.
+5. **Notas**: Almacena las calificaciones asociadas a cada matrícula.
+
+### ¿Qué partes pueden trabajar por separado?
+
+Cada microservicio es independiente en su desarrollo porque tiene su propia base de datos, su propia lógica de negocio y cada uno va a tener su propio contenedor Docker.
+
+### ¿Qué procesos son independientes?
+
+- El proceso de **despliegue** de cada microservicio es independiente, debido a que cada uno cuenta con su propio Dockerfile.
+- El proceso de **modelado de base de datos** de cada uno de ellos es independiente y no existe un bloqueo mutuo.
+- El proceso de **pruebas** para cada microservicio se puede dar de manera aislada e independiente.
 
 ```text
                          ┌─────────────────────┐
@@ -45,6 +55,8 @@ Los principales servicios del sistema de gestión académica son:
              │           │           │             │            │
              ▼           ▼           ▼             ▼            ▼
         PostgreSQL  PostgreSQL   PostgreSQL   PostgreSQL     PostgreSQL
+
+
 ```
 ## Comunicación entre servicios
 ...
