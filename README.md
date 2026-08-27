@@ -15,10 +15,37 @@ Sin este sistema, la institución tendría que depender de procesos manuales o h
 
 
 ## Servicios del sistema
-- 
-- 
-- 
+Los principales servicios del sistema de gestión académica son:
 
+* Docentes
+* Cursos
+* Estudiantes
+* Matrículas
+* Notas
+
+```text
+                         ┌─────────────────────┐
+                         │       Cliente       │
+                         │  Frontend / Postman │
+                         └──────────┬──────────┘
+                                    │
+                                    │ HTTP
+                                    ▼
+                         ┌─────────────────────┐
+                         │      API Gateway    │
+                         └──────────┬──────────┘
+                                    │
+             ┌──────────────────────┼──────────────────────┐
+             │           │          │          │           │
+             ▼           ▼          ▼          ▼           ▼
+        ┌─────────┐ ┌─────────┐ ┌───────────┐ ┌──────────┐ ┌─────────┐
+        │Docentes │ │ Cursos  │ │Estudiante │ │Matrículas│ │  Notas  │
+        │ Service │ │ Service │ │ Service   │ | Service  │ │ Service │
+        └────┬────┘ └────┬────┘ └────┬──────┘ └────┬─────┘ └────┬────┘
+             │           │           │             │            │
+             ▼           ▼           ▼             ▼            ▼
+        PostgreSQL  PostgreSQL   PostgreSQL   PostgreSQL     PostgreSQL
+```
 ## Comunicación entre servicios
 ...
 
