@@ -6,7 +6,7 @@
                          │  Frontend / Postman │
                          └──────────┬──────────┘
                                     │
-                                    │ HTTP 
+                                    │ HTTP
                                     ▼
                          ┌─────────────────────┐
                          │      API Gateway    │
@@ -27,21 +27,21 @@
 ---
 
 ## Problema que resuelve
+
 El sistema resuelve la necesidad de centralizar y automatizar la gestión académica de una institución educativa, que sin él tendría que manejarse de forma manual, dispersa o en hojas de cálculo/sistemas aislados.  
 Concretamente resuelve:
 La desconexión entre los distintos procesos académicos (docentes, cursos, estudiantes, matrículas y notas), integrándose bajo una arquitectura común accesible vía API
-La escalabilidad y mantenibilidad del software académico: al ser microservicios independientes, cada dominio (docentes, cursos, etc.) puede crecer, desplegarse y mantenerse sin afectar a los demás, algo que un sistema monolítico tradicional no permite fácilmente. 
-
+La escalabilidad y mantenibilidad del software académico: al ser microservicios independientes, cada dominio (docentes, cursos, etc.) puede crecer, desplegarse y mantenerse sin afectar a los demás, algo que un sistema monolítico tradicional no permite fácilmente.
 
 ¿Quién lo usará?
 Personal administrativo/académico: para registrar docentes, crear cursos y gestionar matrículas.
-Docentes: consultando o gestionando información de los cursos que dictan (y potencialmente registrando notas). 
-Estudiantes: consultando sus matrículas, cursos inscritos y calificaciones. 
+Docentes: consultando o gestionando información de los cursos que dictan (y potencialmente registrando notas).
+Estudiantes: consultando sus matrículas, cursos inscritos y calificaciones.
 ¿Qué pasaría si no existiera?
 Sin este sistema, la institución tendría que depender de procesos manuales o herramientas no integradas que generaría la gestión manual y propensa a errores, procesos lentos y poco escalables, mayor riesgo de inconsistencia de datos.
 
-
 ## Servicios del sistema
+
 Los principales servicios del sistema de gestión académica son:
 
 1. **Docentes**: Gestiona la información de los profesores: cédula, nombre, correo, departamento y género. Es el punto de partida de la relación académica, ya que cada curso depende de un docente responsable.
@@ -61,9 +61,27 @@ Cada microservicio es independiente en su desarrollo porque tiene su propia base
 - El proceso de **pruebas** para cada microservicio se puede dar de manera aislada e independiente.
 
 ## Comunicación entre servicios
-...
+
+La comunicación entre los microservicios funcionara de manera **síncrona**, usando peticiones **HTTP/REST** se utilizara el formato **JSON**. El **API Gateway** actuara como punto de entrada único: recibe las peticiones del cliente y las enruta al servicio correspondiente según el recurso solicitado:(`/docentes`, `/cursos`, `/estudiantes`, `/matriculas`, `/notas`)..
+
+A su vez hay casos donde un servicio necesita **comunicarse directamente con otro** para validar o completar información, ya que las claves no son solo lógicas osea que no existe una base de datos compartida como Por ejemplo:
+
+1. **Matrículas --> Estudiantes y Cursos**: antes de que exista una matrícula, el servicio de Matrículas debera consultar al servicio de Estudiantes (¿existe el `estudiante_id`?) y al de Cursos (¿existe el `curso_id`?).
+2. **Notas --> Matrículas**: antes de registrar una nota, se valida que el `matricula_id` exista.
+
+### ¿Qué formato de datos se utiliza?
+
+los servicios exponen y consumen datos en **JSON**, lo cual facilitara la operatividad entre ellos sin importar que cada uno tenga su propia base de datos independiente.
+
+### ¿Qué pasa si el servicio consultado no responde?
+
+Si, por ejemplo, Matrículas necesita validar un estudiante y el servicio de Estudiantes no responde, la operación de matrícula **no debería completarse** (para no dejar datos inconsistentes), y se debería retornar un error controlado al cliente en lugar de dejar la petición colgada indefinidamente. Por eso es importante:
+
+1. Definir **timeouts** en las peticiones entre servicios.
+2. Retornar códigos de error claros (por ejemplo, `503 Service Unavailable`) cuando un servicio dependiente falla.
 
 ## Tipo de arquitectura
+
 Se eligió la arquitectura de microservicios porque permite dividir el sistema en servicios independientes, facilitando el mantenimiento y el crecimiento según la demanda. Además, cada módulo puede escalar o actualizarse sin afectar el funcionamiento de los demás. No se eligieron otras arquitecturas porque son menos flexibles para un sistema académico con múltiples procesos.
 
 # Arquitectura Interna de los Microservicios
@@ -89,6 +107,7 @@ microservicio/
 ...
 
 ## Base de datos
+
 ### ¿Qué información debe guardarse?
 
 A continuación se presentan los datos que necesitamos para cada microservicio:
@@ -100,16 +119,17 @@ A continuación se presentan los datos que necesitamos para cada microservicio:
 - **Notas**: Id, `matricula_id`, calificación, observación opcional.
 
 ### 1. Servicio de Docentes (`docentes-service`)
+
 **Tabla:** `docente`
 
-| Campo | Tipo de Dato | Restricciones / Reglas |
-| --- | --- | --- |
-| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
-| `cedula` | `VARCHAR(20)` | `NOT NULL`, `UNIQUE` |
-| `nombre` | `VARCHAR(100)` | `NOT NULL` |
-| `correo` | `VARCHAR(100)` | `NOT NULL`, `UNIQUE` |
-| `departamento` | `VARCHAR(100)` | `NOT NULL` |
-| `genero` | `VARCHAR(20)` | Opcional |
+| Campo          | Tipo de Dato   | Restricciones / Reglas               |
+| -------------- | -------------- | ------------------------------------ |
+| `id`           | `INTEGER`      | Primary Key, Autogenerado (`SERIAL`) |
+| `cedula`       | `VARCHAR(20)`  | `NOT NULL`, `UNIQUE`                 |
+| `nombre`       | `VARCHAR(100)` | `NOT NULL`                           |
+| `correo`       | `VARCHAR(100)` | `NOT NULL`, `UNIQUE`                 |
+| `departamento` | `VARCHAR(100)` | `NOT NULL`                           |
+| `genero`       | `VARCHAR(20)`  | Opcional                             |
 
 ---
 
@@ -117,14 +137,14 @@ A continuación se presentan los datos que necesitamos para cada microservicio:
 
 **Tabla:** `curso`
 
-| Campo | Tipo de Dato | Restricciones / Reglas |
-| --- | --- | --- |
-| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
-| `codigo` | `VARCHAR(20)` | `NOT NULL`, `UNIQUE` |
-| `nombre` | `VARCHAR(100)` | `NOT NULL` |
-| `creditos` | `INTEGER` | `NOT NULL` |
-| `semestre` | `INTEGER` | `NOT NULL` |
-| `docente_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
+| Campo        | Tipo de Dato   | Restricciones / Reglas               |
+| ------------ | -------------- | ------------------------------------ |
+| `id`         | `INTEGER`      | Primary Key, Autogenerado (`SERIAL`) |
+| `codigo`     | `VARCHAR(20)`  | `NOT NULL`, `UNIQUE`                 |
+| `nombre`     | `VARCHAR(100)` | `NOT NULL`                           |
+| `creditos`   | `INTEGER`      | `NOT NULL`                           |
+| `semestre`   | `INTEGER`      | `NOT NULL`                           |
+| `docente_id` | `INTEGER`      | `NOT NULL` (Clave foránea lógica)    |
 
 ---
 
@@ -132,13 +152,13 @@ A continuación se presentan los datos que necesitamos para cada microservicio:
 
 **Tabla:** `estudiante`
 
-| Campo | Tipo de Dato | Restricciones / Reglas |
-| --- | --- | --- |
-| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
-| `cedula` | `VARCHAR(20)` | `NOT NULL`, `UNIQUE` |
-| `nombre` | `VARCHAR(100)` | `NOT NULL` |
-| `correo` | `VARCHAR(100)` | `NOT NULL`, `UNIQUE` |
-| `programa` | `VARCHAR(100)` | `NOT NULL` |
+| Campo      | Tipo de Dato   | Restricciones / Reglas               |
+| ---------- | -------------- | ------------------------------------ |
+| `id`       | `INTEGER`      | Primary Key, Autogenerado (`SERIAL`) |
+| `cedula`   | `VARCHAR(20)`  | `NOT NULL`, `UNIQUE`                 |
+| `nombre`   | `VARCHAR(100)` | `NOT NULL`                           |
+| `correo`   | `VARCHAR(100)` | `NOT NULL`, `UNIQUE`                 |
+| `programa` | `VARCHAR(100)` | `NOT NULL`                           |
 
 ---
 
@@ -146,13 +166,13 @@ A continuación se presentan los datos que necesitamos para cada microservicio:
 
 **Tabla:** `matricula`
 
-| Campo | Tipo de Dato | Restricciones / Reglas |
-| --- | --- | --- |
-| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
-| `estudiante_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
-| `curso_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
-| `anio` | `INTEGER` | `NOT NULL` (Año lectivo) |
-| `periodo` | `VARCHAR(10)` | `NOT NULL` (Ej: '1', '2', '2026-1') |
+| Campo           | Tipo de Dato  | Restricciones / Reglas               |
+| --------------- | ------------- | ------------------------------------ |
+| `id`            | `INTEGER`     | Primary Key, Autogenerado (`SERIAL`) |
+| `estudiante_id` | `INTEGER`     | `NOT NULL` (Clave foránea lógica)    |
+| `curso_id`      | `INTEGER`     | `NOT NULL` (Clave foránea lógica)    |
+| `anio`          | `INTEGER`     | `NOT NULL` (Año lectivo)             |
+| `periodo`       | `VARCHAR(10)` | `NOT NULL` (Ej: '1', '2', '2026-1')  |
 
 ---
 
@@ -160,13 +180,12 @@ A continuación se presentan los datos que necesitamos para cada microservicio:
 
 **Tabla:** `nota`
 
-| Campo | Tipo de Dato | Restricciones / Reglas |
-| --- | --- | --- |
-| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
-| `matricula_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
-| `calificacion` | `NUMERIC(3,2)` | `NOT NULL` (Ej: 4.50) |
-| `observacion` | `VARCHAR(200)` | Opcional |
-
+| Campo          | Tipo de Dato   | Restricciones / Reglas               |
+| -------------- | -------------- | ------------------------------------ |
+| `id`           | `INTEGER`      | Primary Key, Autogenerado (`SERIAL`) |
+| `matricula_id` | `INTEGER`      | `NOT NULL` (Clave foránea lógica)    |
+| `calificacion` | `NUMERIC(3,2)` | `NOT NULL` (Ej: 4.50)                |
+| `observacion`  | `VARCHAR(200)` | Opcional                             |
 
 ### ¿Qué datos son críticos?
 
@@ -186,9 +205,21 @@ Al tener bases de datos separadas, la pérdida de algún dato no necesariamente 
 4. **Se pierden Notas**: Se pierde el historial académico.
 
 ## Usuarios del sistema
-...
+
+### Tipos de usuarios que existen y qué podrán hacer
+
+| Usuario                      | Descripción                                          | Acciones principales                                                              |
+| ---------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------- |
+| **Administrativo/Académico** | Personal encargado de la gestión general del sistema | Registrar docentes, crear cursos, gestionar matrículas                            |
+| **Docente**                  | Profesor responsable de uno o más cursos             | Consultar/gestionar información de sus cursos, registrar notas de sus estudiantes |
+| **Estudiante**               | Usuario matriculado en uno o más cursos              | Consultar sus matrículas, cursos inscritos y calificaciones                       |
+
+### ¿Todos los usuarios acceden de la misma forma?
+
+No. Aunque todos ingresan a través del mismo **API Gateway**, el nivel de acceso depende del rol: un estudiante solo debería poder **consultar** su propia información (matrículas y notas), mientras que el personal administrativo y los docentes tienen permisos para **crear y modificar** datos (cursos, matrículas, notas, según corresponda a su rol).
 
 ## Riesgos y fallas posibles
+
 ### Fallas en un servicio (ejemplo: servicio de Notas)
 
 Si se presentan fallas, por ejemplo, en el servicio de Notas, las demás funcionalidades (matricular, consultar docentes/cursos) siguen funcionando, pero cualquier operación que dependa de Notas (consultar calificaciones) fallará: el Gateway enruta la petición, pero no se obtendría respuesta.
