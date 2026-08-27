@@ -51,7 +51,6 @@ Sin este sistema, la institución tendría que depender de procesos manuales o h
 
 ## Tipo de arquitectura
 Se eligió la arquitectura de microservicios porque permite dividir el sistema en servicios independientes, facilitando el mantenimiento y el crecimiento según la demanda. Además, cada módulo puede escalar o actualizarse sin afectar el funcionamiento de los demás. No se eligieron otras arquitecturas porque son menos flexibles para un sistema académico con múltiples procesos.
-# Modelo de Datos y Dominio
 
 # Arquitectura Interna de los Microservicios
 
