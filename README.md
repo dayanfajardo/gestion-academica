@@ -26,6 +26,27 @@ Sin este sistema, la institución tendría que depender de procesos manuales o h
 microservicios
 Se eligió una arquitectura basada en microservicios porque, aunque el sistema no es demasiado grande, tiene diferentes partes del negocio que están bien separadas y que no tienen el mismo nivel de uso. Por ejemplo, las matrículas y las notas pueden tener mucha más actividad en ciertos periodos del año. Con microservicios podemos escalar de forma independiente las partes que más lo necesiten y, si una falla, no necesariamente afecta a todo el sistema.
 No se escogió una arquitectura en capas porque, al estar todo más centralizado, sería necesario escalar gran parte del sistema aunque solo una sección tuviera mucha carga. Tampoco se eligió una arquitectura completamente basada en eventos, porque agregaría una complejidad de comunicación y mensajería que no es necesaria para un sistema donde la mayoría de las operaciones son CRUD. Finalmente, se descartó el modelo cliente-servidor tradicional porque no permite tener tanta independencia para desplegar y manejar cada parte del sistema por separado   
+                         ┌─────────────────────┐
+                         │       Cliente       │
+                         │  Frontend / Postman │
+                         └──────────┬──────────┘
+                                    │
+                                    │ HTTP
+                                    ▼
+                         ┌─────────────────────┐
+                         │      API Gateway    │
+                         └──────────┬──────────┘
+                                    │
+             ┌──────────────────────┼──────────────────────┐
+             │           │          │          │           │
+             ▼           ▼          ▼          ▼           ▼
+        ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
+        │Docentes │ │ Cursos  │ │Estudiant│ │Matrículas│ │  Notas  │
+        │ Service │ │ Service │ │ Service │ │ Service │ │ Service │
+        └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘ └────┬────┘
+             │           │          │          │           │
+             ▼           ▼          ▼          ▼           ▼
+        PostgreSQL  PostgreSQL PostgreSQL PostgreSQL PostgreSQL
 
 ## Base de datos
 ...
