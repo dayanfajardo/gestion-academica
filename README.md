@@ -6,7 +6,7 @@
                          │  Frontend / Postman │
                          └──────────┬──────────┘
                                     │
-                                    │ HTTP
+                                    │ HTTP 
                                     ▼
                          ┌─────────────────────┐
                          │      API Gateway    │
