@@ -9,3 +9,18 @@ def connect_db():
         password=os.getenv('DB_PASSWORD'),
         port=os.getenv('DB_PORT', 5432)
     )
+
+def init_db():
+    connection = connect_db()
+    cursor = connection.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS nota (
+            id SERIAL PRIMARY KEY,
+            matricula_id INTEGER NOT NULL,
+            calificacion NUMERIC(3,2) NOT NULL,
+            observacion VARCHAR(200)
+        );
+    """)
+    connection.commit()
+    cursor.close()
+    connection.close()

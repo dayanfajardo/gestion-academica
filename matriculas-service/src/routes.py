@@ -3,7 +3,7 @@ from src.services import (
     fetch_all_enrollments,
     create_new_enrollment,
     fetch_enrollment_by_id,
-    update__enrollment_by_id,
+    update_enrollment_by_id,
     delete_enrollment_by_id
 )
 
@@ -29,7 +29,7 @@ def get_enrollment(id):
 @matriculas_bp.route('/matriculas/<id>', methods=['PUT'])
 def update_enrollemnt(id):
     body = request.get_json()
-    update__enrollment_by_id(id, body)
+    update_enrollment_by_id(id, body)
     return jsonify({'mensaje': 'Matricula actualizado con éxtito', 'id':id}), 200
 
 @matriculas_bp.route('/matriculas/<id>', methods=['DELETE'])
