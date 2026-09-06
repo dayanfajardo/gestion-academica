@@ -1,5 +1,32 @@
 # Arquitectura del Sistema: Sistema Académico Distribuido
 
+##  Objetivo del Proyecto
+El propósito principal de este proyecto es diseñar e implementar una plataforma integral para la administración de procesos académicos universitarios, facilitando el control y seguimiento de docentes, cursos, estudiantes, matrículas y calificaciones.
+
+Para lograrlo, el sistema adopta un enfoque modular basado en microservicios, buscando resolver las necesidades clave del entorno educativo:
+* **Autonomía y escalabilidad:** Desacoplar cada área funcional (Docentes, Cursos, Estudiantes, Matrículas y Notas) para que puedan evolucionar y mantenerse de forma independiente.
+* **Punto de acceso unificado:** Centralizar todas las peticiones de los clientes a través de un API Gateway, garantizando una comunicación ordenada y segura.
+* **Aislamiento de datos:** Respaldar cada servicio con su propia base de datos PostgreSQL, asegurando la integridad y disponibilidad de la información sin dependencias directas entre módulos.
+
+
+
+
+
+
+ Integrantes y Roles
+
+| Integrante | Rol en el Proyecto | Responsabilidades Principales |
+| :--- | :--- | :--- |
+| Olver Edinson Arenas Vásquez | Desarrollador | Implementación de microservicios y documentación técnica |
+| Dayan Fajardo | Administrador / DevOps | Gestión del repositorio, control de versiones y revisiones |
+| daniel fernandez | Desarrollador | Desarrollo de microservicios y lógica de negocio |
+| cristian giron | Desarrollador | Pruebas de integración, endpoints y soporte en base de datos |
+
+
+
+
+
+
 ```text
                          ┌─────────────────────┐
                          │       Cliente       │
@@ -22,11 +49,11 @@
              │           │          │          │           │
              ▼           ▼          ▼          ▼           ▼
         PostgreSQL  PostgreSQL PostgreSQL PostgreSQL PostgreSQL
-```
 
----
 
-## Problema que resuelve
+
+
+ Problema que resuelve
 El sistema resuelve la necesidad de centralizar y automatizar la gestión académica de una institución educativa, que sin él tendría que manejarse de forma manual, dispersa o en hojas de cálculo/sistemas aislados.  
 Concretamente resuelve:
 La desconexión entre los distintos procesos académicos (docentes, cursos, estudiantes, matrículas y notas), integrándose bajo una arquitectura común accesible vía API
@@ -41,21 +68,22 @@ Estudiantes: consultando sus matrículas, cursos inscritos y calificaciones.
 Sin este sistema, la institución tendría que depender de procesos manuales o herramientas no integradas que generaría la gestión manual y propensa a errores, procesos lentos y poco escalables, mayor riesgo de inconsistencia de datos.
 
 
-## Servicios del sistema
+ Servicios del sistema
 - 
 - 
 - 
 
-## Comunicación entre servicios
+ Comunicación entre servicios
 ...
 
 ## Tipo de arquitectura
 Se eligió la arquitectura de microservicios porque permite dividir el sistema en servicios independientes, facilitando el mantenimiento y el crecimiento según la demanda. Además, cada módulo puede escalar o actualizarse sin afectar el funcionamiento de los demás. No se eligieron otras arquitecturas porque son menos flexibles para un sistema académico con múltiples procesos.
-# Modelo de Datos y Dominio
 
-### 1. Servicio de Docentes (`docentes-service`)
+ Modelo de Datos y Dominio
 
-**Tabla:** `docente`
+ 1. Servicio de Docentes (`docentes-service`)
+
+ Tabla: `docente`
 
 | Campo | Tipo de Dato | Restricciones / Reglas |
 | --- | --- | --- |
@@ -66,11 +94,11 @@ Se eligió la arquitectura de microservicios porque permite dividir el sistema e
 | `departamento` | `VARCHAR(100)` | `NOT NULL` |
 | `genero` | `VARCHAR(20)` | Opcional |
 
----
 
-### 2. Servicio de Cursos (`cursos-service`)
 
-**Tabla:** `curso`
+ 2. Servicio de Cursos (`cursos-service`)
+
+ Tabla: `curso`
 
 | Campo | Tipo de Dato | Restricciones / Reglas |
 | --- | --- | --- |
@@ -81,11 +109,11 @@ Se eligió la arquitectura de microservicios porque permite dividir el sistema e
 | `semestre` | `INTEGER` | `NOT NULL` |
 | `docente_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
 
----
 
-### 3. Servicio de Estudiantes (`estudiantes-service`)
 
-**Tabla:** `estudiante`
+ 3. Servicio de Estudiantes (`estudiantes-service`)
+
+ Tabla: `estudiante`
 
 | Campo | Tipo de Dato | Restricciones / Reglas |
 | --- | --- | --- |
@@ -95,11 +123,11 @@ Se eligió la arquitectura de microservicios porque permite dividir el sistema e
 | `correo` | `VARCHAR(100)` | `NOT NULL`, `UNIQUE` |
 | `programa` | `VARCHAR(100)` | `NOT NULL` |
 
----
 
-### 4. Servicio de Matrículas (`matriculas-service`)
 
-**Tabla:** `matricula`
+ 4. Servicio de Matrículas (`matriculas-service`)
+
+Tabla: `matricula`
 
 | Campo | Tipo de Dato | Restricciones / Reglas |
 | --- | --- | --- |
@@ -109,11 +137,11 @@ Se eligió la arquitectura de microservicios porque permite dividir el sistema e
 | `anio` | `INTEGER` | `NOT NULL` (Año lectivo) |
 | `periodo` | `VARCHAR(10)` | `NOT NULL` (Ej: '1', '2', '2026-1') |
 
----
 
-### 5. Servicio de Notas (`notas-service`)
 
-**Tabla:** `nota`
+ 5. Servicio de Notas (`notas-service`)
+
+ Tabla: `nota`
 
 | Campo | Tipo de Dato | Restricciones / Reglas |
 | --- | --- | --- |
@@ -122,14 +150,14 @@ Se eligió la arquitectura de microservicios porque permite dividir el sistema e
 | `calificacion` | `NUMERIC(3,2)` | `NOT NULL` (Ej: 4.50) |
 | `observacion` | `VARCHAR(200)` | Opcional |
 
----
 
 
-# Relaciones del Sistema
+
+ Relaciones del Sistema
 
 Las principales relaciones del dominio académico son las siguientes:
 
-## Docente → Curso
+ Docente → Curso
 
 ```text
 Docente (1) ─────────── (N) Curso
@@ -145,7 +173,7 @@ docente_id
 
 Este identificador permite establecer la relación lógica entre `docente` y `curso`.
 
----
+
 
 ## Estudiante ↔ Curso
 
@@ -184,9 +212,9 @@ curso_id
 
 permitiendo identificar qué estudiante está inscrito en qué curso.
 
----
 
-##  Matrícula → Nota
+
+  Matrícula → Nota
 
 ```text
 Matrícula (1) ─────────── (N) Nota
@@ -202,11 +230,11 @@ matricula_id
 
 De esta manera, cada nota queda asociada a una matrícula específica.
 
----
 
 
 
-# Arquitectura Interna de los Microservicios
+
+ Arquitectura Interna de los Microservicios
 
 Cada microservicio utiliza una estructura modular basada en diferentes capas.
 
@@ -226,7 +254,7 @@ microservicio/
 └── Dockerfile
 ```
 
-## Responsabilidad de cada componente
+ Responsabilidad de cada componente
 
 | Archivo / Componente   | Responsabilidad                                                                                     |
 | :--------------------- | :-------------------------------------------------------------------------------------------------- |
@@ -237,7 +265,7 @@ microservicio/
 | **`requirements.txt`** | Contiene las dependencias necesarias para ejecutar el microservicio.                                |
 | **`Dockerfile`**       | Define la configuración necesaria para construir la imagen Docker del microservicio.                |
 
----
+
 
 # Tecnologías Utilizadas
 
@@ -251,10 +279,10 @@ microservicio/
 | **Docker Compose**  | Orquestación de los contenedores.                 |
 | **API Gateway**     | Enrutamiento centralizado de las solicitudes.     |
 
----
 
 
-...
+
+
 
 ## Base de datos
 ...
