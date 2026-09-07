@@ -9,14 +9,15 @@ Sistema de gestión académica basado en una **arquitectura de microservicios**,
 - [Integrantes y roles](#integrantes-y-roles)
 - [Arquitectura del sistema](#arquitectura-del-sistema)
 - [Servicios del sistema](#servicios-del-sistema)
-- [Docker](#docker)
-- [Docker-compose](#docker-compose)
 - [Comunicación entre servicios](#comunicación-entre-servicios)
 - [Tipo de arquitectura](#tipo-de-arquitectura)
 - [Modelo de datos y dominio](#modelo-de-datos-y-dominio)
 - [Usuarios del sistema](#usuarios-del-sistema)
 - [Arquitectura interna de los microservicios](#arquitectura-interna-de-los-microservicios)
 - [Manejo de fallas](#manejo-de-fallas)
+- [Docker](#docker)
+- [Docker-compose](#docker-compose)
+- [Estado del proyecto](#estado-del-proyecto)
 
 ---
 
@@ -122,33 +123,6 @@ También son independientes los procesos de:
 - **Pruebas**.
 
 ---
-
-## Docker
-
-La vista `frontend/index.html` es un archivo estático. Actualmente no tiene un contenedor propio ni un proceso de compilación independiente. Se sirve desde el contenedor `gateway`, que utiliza Nginx como servidor web y también como API Gateway.
-
-## Recorrido de la vista
-
-```text
-Navegador
-   ↓ http://localhost:8000
-Docker
-   ↓ puerto 8000 → puerto 80
-Contenedor gateway
-   ↓
-Nginx
-   ↓
-/usr/share/nginx/html/index.html
-   ↓
-frontend/index.html
-```
-## Docker-compose
-El proyecto cuenta con un archivo `docker-compose.yml` que permite levantar todos los servicios y sus bases de datos de manera coordinada.
-
-Para ejecutarlo se debe utilizar el comando:
-```bash
-docker-compose up --build -d
-```
 ## Comunicación entre servicios
 
 La comunicación entre los microservicios funciona de manera **síncrona** mediante peticiones **HTTP/REST**, utilizando **JSON** como formato de intercambio de datos.
@@ -347,7 +321,32 @@ Una falla o pérdida de información en una base de datos puede generar inconsis
 - Monitorear recursos como conexiones activas, espacio en disco y disponibilidad para detectar problemas antes de una caída total.
 
 ---
+## Docker
 
+La vista `frontend/index.html` es un archivo estático. Actualmente no tiene un contenedor propio ni un proceso de compilación independiente. Se sirve desde el contenedor `gateway`, que utiliza Nginx como servidor web y también como API Gateway.
+
+## Recorrido de la vista
+
+```text
+Navegador
+   ↓ http://localhost:8000
+Docker
+   ↓ puerto 8000 → puerto 80
+Contenedor gateway
+   ↓
+Nginx
+   ↓
+/usr/share/nginx/html/index.html
+   ↓
+frontend/index.html
+```
+## Docker-compose
+El proyecto cuenta con un archivo `docker-compose.yml` que permite levantar todos los servicios y sus bases de datos de manera coordinada.
+
+Para ejecutarlo se debe utilizar el comando:
+```bash
+docker-compose up --build -d
+```
 ## Estado del proyecto
 
 Proyecto académico en desarrollo, orientado a aplicar conceptos de **sistemas distribuidos, microservicios, APIs REST, Docker y PostgreSQL**.
