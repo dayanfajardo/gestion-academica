@@ -131,7 +131,7 @@ services:
     ports:
       - "8000:80"
     volumes:
-      - ./fronentd:/usr/share/nginx/html
+      - ./frontend:/usr/share/nginx/html
     depends_on:
       - docentes-service
       - cursos-service
