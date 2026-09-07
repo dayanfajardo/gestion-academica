@@ -33,7 +33,7 @@ Para lograrlo, el sistema adopta un enfoque modular basado en microservicios, bu
                          │  Frontend / Postman │
                          └──────────┬──────────┘
                                     │
-                                    │ HTTP 
+                                    │ HTTP
                                     ▼
                          ┌─────────────────────┐
                          │      API Gateway    │
@@ -57,13 +57,12 @@ Para lograrlo, el sistema adopta un enfoque modular basado en microservicios, bu
 El sistema resuelve la necesidad de centralizar y automatizar la gestión académica de una institución educativa, que sin él tendría que manejarse de forma manual, dispersa o en hojas de cálculo/sistemas aislados.  
 Concretamente resuelve:
 La desconexión entre los distintos procesos académicos (docentes, cursos, estudiantes, matrículas y notas), integrándose bajo una arquitectura común accesible vía API
-La escalabilidad y mantenibilidad del software académico: al ser microservicios independientes, cada dominio (docentes, cursos, etc.) puede crecer, desplegarse y mantenerse sin afectar a los demás, algo que un sistema monolítico tradicional no permite fácilmente. 
-
+La escalabilidad y mantenibilidad del software académico: al ser microservicios independientes, cada dominio (docentes, cursos, etc.) puede crecer, desplegarse y mantenerse sin afectar a los demás, algo que un sistema monolítico tradicional no permite fácilmente.
 
 ¿Quién lo usará?
 Personal administrativo/académico: para registrar docentes, crear cursos y gestionar matrículas.
-Docentes: consultando o gestionando información de los cursos que dictan (y potencialmente registrando notas). 
-Estudiantes: consultando sus matrículas, cursos inscritos y calificaciones. 
+Docentes: consultando o gestionando información de los cursos que dictan (y potencialmente registrando notas).
+Estudiantes: consultando sus matrículas, cursos inscritos y calificaciones.
 ¿Qué pasaría si no existiera?
 Sin este sistema, la institución tendría que depender de procesos manuales o herramientas no integradas que generaría la gestión manual y propensa a errores, procesos lentos y poco escalables, mayor riesgo de inconsistencia de datos.
 
@@ -85,14 +84,7 @@ Se eligió la arquitectura de microservicios porque permite dividir el sistema e
 
  Tabla: `docente`
 
-| Campo | Tipo de Dato | Restricciones / Reglas |
-| --- | --- | --- |
-| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
-| `cedula` | `VARCHAR(20)` | `NOT NULL`, `UNIQUE` |
-| `nombre` | `VARCHAR(100)` | `NOT NULL` |
-| `correo` | `VARCHAR(100)` | `NOT NULL`, `UNIQUE` |
-| `departamento` | `VARCHAR(100)` | `NOT NULL` |
-| `genero` | `VARCHAR(20)` | Opcional |
+### ¿Qué procesos son independientes?
 
 
 
@@ -100,14 +92,7 @@ Se eligió la arquitectura de microservicios porque permite dividir el sistema e
 
  Tabla: `curso`
 
-| Campo | Tipo de Dato | Restricciones / Reglas |
-| --- | --- | --- |
-| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
-| `codigo` | `VARCHAR(20)` | `NOT NULL`, `UNIQUE` |
-| `nombre` | `VARCHAR(100)` | `NOT NULL` |
-| `creditos` | `INTEGER` | `NOT NULL` |
-| `semestre` | `INTEGER` | `NOT NULL` |
-| `docente_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
+A su vez hay casos donde un servicio necesita **comunicarse directamente con otro** para validar o completar información, ya que las claves no son solo lógicas osea que no existe una base de datos compartida como Por ejemplo:
 
 
 
@@ -115,13 +100,7 @@ Se eligió la arquitectura de microservicios porque permite dividir el sistema e
 
  Tabla: `estudiante`
 
-| Campo | Tipo de Dato | Restricciones / Reglas |
-| --- | --- | --- |
-| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
-| `cedula` | `VARCHAR(20)` | `NOT NULL`, `UNIQUE` |
-| `nombre` | `VARCHAR(100)` | `NOT NULL` |
-| `correo` | `VARCHAR(100)` | `NOT NULL`, `UNIQUE` |
-| `programa` | `VARCHAR(100)` | `NOT NULL` |
+### ¿Qué pasa si el servicio consultado no responde?
 
 
 
@@ -129,13 +108,7 @@ Se eligió la arquitectura de microservicios porque permite dividir el sistema e
 
 Tabla: `matricula`
 
-| Campo | Tipo de Dato | Restricciones / Reglas |
-| --- | --- | --- |
-| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
-| `estudiante_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
-| `curso_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
-| `anio` | `INTEGER` | `NOT NULL` (Año lectivo) |
-| `periodo` | `VARCHAR(10)` | `NOT NULL` (Ej: '1', '2', '2026-1') |
+Se eligió la arquitectura de microservicios porque permite dividir el sistema en servicios independientes, facilitando el mantenimiento y el crecimiento según la demanda. Además, cada módulo puede escalar o actualizarse sin afectar el funcionamiento de los demás. No se eligieron otras arquitecturas porque son menos flexibles para un sistema académico con múltiples procesos.
 
 
 
@@ -143,100 +116,115 @@ Tabla: `matricula`
 
  Tabla: `nota`
 
-| Campo | Tipo de Dato | Restricciones / Reglas |
-| --- | --- | --- |
-| `id` | `INTEGER` | Primary Key, Autogenerado (`SERIAL`) |
-| `matricula_id` | `INTEGER` | `NOT NULL` (Clave foránea lógica) |
-| `calificacion` | `NUMERIC(3,2)` | `NOT NULL` (Ej: 4.50) |
-| `observacion` | `VARCHAR(200)` | Opcional |
+...
 
 
+### ¿Qué información debe guardarse?
 
 
  Relaciones del Sistema
 
-Las principales relaciones del dominio académico son las siguientes:
+- **Docentes**: Id, cédula (identificación única), nombre, correo institucional, departamento, género (opcional).
+- **Cursos**: Id, código único, nombre, número de créditos, semestre, y el `docente_id` que lo dicta.
+- **Estudiantes**: Id, cédula, nombre, correo institucional, programa académico.
+- **Matrículas**: Id, `estudiante_id`, `curso_id`, año lectivo, periodo.
+- **Notas**: Id, `matricula_id`, calificación, observación opcional.
 
  Docente → Curso
 
-```text
-Docente (1) ─────────── (N) Curso
-```
+**Tabla:** `docente`
 
-Un docente puede impartir múltiples cursos.
+| Campo          | Tipo de Dato   | Restricciones / Reglas               |
+| -------------- | -------------- | ------------------------------------ |
+| `id`           | `INTEGER`      | Primary Key, Autogenerado (`SERIAL`) |
+| `cedula`       | `VARCHAR(20)`  | `NOT NULL`, `UNIQUE`                 |
+| `nombre`       | `VARCHAR(100)` | `NOT NULL`                           |
+| `correo`       | `VARCHAR(100)` | `NOT NULL`, `UNIQUE`                 |
+| `departamento` | `VARCHAR(100)` | `NOT NULL`                           |
+| `genero`       | `VARCHAR(20)`  | Opcional                             |
 
-Cada curso tiene asociado un docente responsable mediante el atributo:
+---
 
-```text
-docente_id
-```
+### 2. Servicio de Cursos (`cursos-service`)
 
-Este identificador permite establecer la relación lógica entre `docente` y `curso`.
+**Tabla:** `curso`
+
+| Campo        | Tipo de Dato   | Restricciones / Reglas               |
+| ------------ | -------------- | ------------------------------------ |
+| `id`         | `INTEGER`      | Primary Key, Autogenerado (`SERIAL`) |
+| `codigo`     | `VARCHAR(20)`  | `NOT NULL`, `UNIQUE`                 |
+| `nombre`     | `VARCHAR(100)` | `NOT NULL`                           |
+| `creditos`   | `INTEGER`      | `NOT NULL`                           |
+| `semestre`   | `INTEGER`      | `NOT NULL`                           |
+| `docente_id` | `INTEGER`      | `NOT NULL` (Clave foránea lógica)    |
 
 
 
-## Estudiante ↔ Curso
+### 3. Servicio de Estudiantes (`estudiantes-service`)
 
-```text
-Estudiante (N) ─────────── (M) Curso
-```
+**Tabla:** `estudiante`
 
-Un estudiante puede matricularse en múltiples cursos y un curso puede tener múltiples estudiantes.
+| Campo      | Tipo de Dato   | Restricciones / Reglas               |
+| ---------- | -------------- | ------------------------------------ |
+| `id`       | `INTEGER`      | Primary Key, Autogenerado (`SERIAL`) |
+| `cedula`   | `VARCHAR(20)`  | `NOT NULL`, `UNIQUE`                 |
+| `nombre`   | `VARCHAR(100)` | `NOT NULL`                           |
+| `correo`   | `VARCHAR(100)` | `NOT NULL`, `UNIQUE`                 |
+| `programa` | `VARCHAR(100)` | `NOT NULL`                           |
 
-Debido a que esta relación es de tipo **N:M**, se utiliza la entidad `matricula` como entidad intermedia.
+---
 
-```text
-┌──────────────┐
-│  Estudiante  │
-└──────┬───────┘
-       │
-       │ 1:N
-       ▼
-┌──────────────┐
-│  Matrícula   │
-└──────┬───────┘
-       │
-       │ N:1
-       ▼
-┌──────────────┐
-│    Curso     │
-└──────────────┘
-```
+### 4. Servicio de Matrículas (`matriculas-service`)
 
-La entidad `matricula` almacena los identificadores:
+**Tabla:** `matricula`
 
-```text
-estudiante_id
-curso_id
-```
-
-permitiendo identificar qué estudiante está inscrito en qué curso.
+| Campo           | Tipo de Dato  | Restricciones / Reglas               |
+| --------------- | ------------- | ------------------------------------ |
+| `id`            | `INTEGER`     | Primary Key, Autogenerado (`SERIAL`) |
+| `estudiante_id` | `INTEGER`     | `NOT NULL` (Clave foránea lógica)    |
+| `curso_id`      | `INTEGER`     | `NOT NULL` (Clave foránea lógica)    |
+| `anio`          | `INTEGER`     | `NOT NULL` (Año lectivo)             |
+| `periodo`       | `VARCHAR(10)` | `NOT NULL` (Ej: '1', '2', '2026-1')  |
 
 
 
   Matrícula → Nota
 
-```text
-Matrícula (1) ─────────── (N) Nota
-```
+**Tabla:** `nota`
 
-Una matrícula puede tener múltiples registros de notas correspondientes a diferentes evaluaciones o actividades académicas.
+| Campo          | Tipo de Dato   | Restricciones / Reglas               |
+| -------------- | -------------- | ------------------------------------ |
+| `id`           | `INTEGER`      | Primary Key, Autogenerado (`SERIAL`) |
+| `matricula_id` | `INTEGER`      | `NOT NULL` (Clave foránea lógica)    |
+| `calificacion` | `NUMERIC(3,2)` | `NOT NULL` (Ej: 4.50)                |
+| `observacion`  | `VARCHAR(200)` | Opcional                             |
 
-La relación se establece mediante:
+### ¿Qué datos son críticos?
 
-```text
-matricula_id
-```
+1. **Cédula** (docente y estudiante): Es único y no editable; identifica legalmente a la persona. Si se duplica o se pierde, se rompe la trazabilidad académica.
+2. **docente_id** (Curso): Sin este dato, un curso queda sin responsable.
+3. **estudiante_id y curso_id** (Matrícula): Son las llaves lógicas que conectan nuestro sistema; perder esto rompe la relación estudiante-curso.
+4. **matricula_id** (Nota): Sin este vínculo, una calificación queda sin dueño.
+5. **Calificación**: Es el dato final que certifica el rendimiento académico.
 
-De esta manera, cada nota queda asociada a una matrícula específica.
+### ¿Qué pasaría si se pierden?
 
 
+1. **Se pierden Docentes**: Los cursos quedan con un `docente_id` que ya no existe.
+2. **Se pierden Estudiantes**: Las matrículas quedan con `estudiante_id` huérfanos.
+3. **Se pierden Cursos**: El estudiante tiene una nota, pero no se podría saber en qué materia.
+4. **Se pierden Notas**: Se pierde el historial académico.
 
+## Usuarios del sistema
 
 
  Arquitectura Interna de los Microservicios
 
-Cada microservicio utiliza una estructura modular basada en diferentes capas.
+| Usuario                      | Descripción                                          | Acciones principales                                                              |
+| ---------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------- |
+| **Administrativo/Académico** | Personal encargado de la gestión general del sistema | Registrar docentes, crear cursos, gestionar matrículas                            |
+| **Docente**                  | Profesor responsable de uno o más cursos             | Consultar/gestionar información de sus cursos, registrar notas de sus estudiantes |
+| **Estudiante**               | Usuario matriculado en uno o más cursos              | Consultar sus matrículas, cursos inscritos y calificaciones                       |
 
 ```text
 microservicio/
@@ -256,39 +244,25 @@ microservicio/
 
  Responsabilidad de cada componente
 
-| Archivo / Componente   | Responsabilidad                                                                                     |
-| :--------------------- | :-------------------------------------------------------------------------------------------------- |
-| **`app.py`**           | Punto de entrada y configuración principal de la aplicación Flask.                                  |
-| **`src/routes.py`**    | Define los endpoints HTTP utilizando `Blueprints`. Recibe las peticiones y devuelve las respuestas. |
-| **`src/services.py`**  | Contiene la lógica de negocio y las operaciones SQL necesarias para gestionar los datos.            |
-| **`db.py`**            | Gestiona la conexión con PostgreSQL mediante `psycopg2-binary`.                                     |
-| **`requirements.txt`** | Contiene las dependencias necesarias para ejecutar el microservicio.                                |
-| **`Dockerfile`**       | Define la configuración necesaria para construir la imagen Docker del microservicio.                |
+No. Aunque todos ingresan a través del mismo **API Gateway**, el nivel de acceso depende del rol: un estudiante solo debería poder **consultar** su propia información (matrículas y notas), mientras que el personal administrativo y los docentes tienen permisos para **crear y modificar** datos (cursos, matrículas, notas, según corresponda a su rol).
 
 
 
-# Tecnologías Utilizadas
+### Fallas en un servicio (ejemplo: servicio de Notas)
 
-| Tecnología          | Uso                                               |
-| :------------------ | :------------------------------------------------ |
-| **Python**          | Lenguaje principal de desarrollo.                 |
-| **Flask**           | Framework utilizado para construir las APIs REST. |
-| **PostgreSQL**      | Sistema gestor de bases de datos.                 |
-| **psycopg2-binary** | Conector entre Python y PostgreSQL.               |
-| **Docker**          | Contenerización de los microservicios.            |
-| **Docker Compose**  | Orquestación de los contenedores.                 |
-| **API Gateway**     | Enrutamiento centralizado de las solicitudes.     |
+Si se presentan fallas, por ejemplo, en el servicio de Notas, las demás funcionalidades (matricular, consultar docentes/cursos) siguen funcionando, pero cualquier operación que dependa de Notas (consultar calificaciones) fallará: el Gateway enruta la petición, pero no se obtendría respuesta.
+
+
+- Implementar un endpoint `/health` en cada servicio; de esta forma el Gateway sabrá qué servicios se encuentran disponibles.
+- Si el servicio se está reiniciando y no está caído, se necesitaría la implementación de **reintentos exponenciales**, en donde se esperaría cada vez más tiempo entre cada intento fallido de conexión.
 
 
 
 
+Si hay fallos en la base de datos se generarían inconsistencias en la lógica de nuestro sistema, ya que se pierden referencias a datos que se encuentran en las demás bases de datos.
 
+**Solución:**
 
-## Base de datos
-...
-
-## Usuarios del sistema
-...
-
-## Riesgos y fallas posibles
-...
+- Implementar backups automáticos y periódicos.
+- Réplicas de lectura en los servicios más consultados, de modo que si la instancia principal falla pueda responder una réplica.
+- Monitorear los recursos de nuestras bases de datos (conexiones activas, espacio en disco, etc.) para detectar problemas antes de que se vuelvan caídas totales.
