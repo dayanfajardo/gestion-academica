@@ -68,27 +68,28 @@ Para lograrlo, el sistema adopta un enfoque modular basado en microservicios:
 ## Arquitectura del sistema
 
 ```text
-                         ┌─────────────────────┐
-                         │       Cliente       │
-                         │  Frontend / Postman │
-                         └──────────┬──────────┘
-                                    │
-                                    │ HTTP
-                                    ▼
-                         ┌─────────────────────┐
-                         │      API Gateway    │
-                         └──────────┬──────────┘
-                                    │
-             ┌──────────────────────┼──────────────────────┐
-             │           │          │          │           │
-             ▼           ▼          ▼          ▼           ▼
-        ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌───────────┐ ┌─────────┐
-        │Docentes │ │ Cursos  │ │Estudiant│ │Matrículas │ │  Notas  │
-        │ Service │ │ Service │ │ Service │ │  Service  │ │ Service │
-        └────┬────┘ └────┬────┘ └────┬────┘ └─────┬─────┘ └────┬────┘
-             │           │           │            │            │
-             ▼           ▼           ▼            ▼            ▼
-        PostgreSQL  PostgreSQL  PostgreSQL   PostgreSQL   PostgreSQL
+┌───────────────────────────┐
+│          Usuario          │
+└─────────────┬─────────────┘
+              │
+              ▼
+┌───────────────────────────┐
+│          Frontend         │
+│     Home / Interfaz UI    │
+└─────────────┬─────────────┘
+              │ HTTP
+              ▼
+┌───────────────────────────┐
+│        API Gateway        │
+└─────────────┬─────────────┘
+              │
+       ┌──────┼──────┬──────────┬─────────┐
+       ▼      ▼      ▼          ▼         ▼
+  Docentes  Cursos  Estudiantes Matrículas Notas
+  Service   Service   Service    Service   Service
+      │        │        │          │         │
+      ▼        ▼        ▼          ▼         ▼
+ PostgreSQL PostgreSQL PostgreSQL PostgreSQL PostgreSQL
 ```
 
 Cada microservicio posee su propia lógica de negocio, base de datos y contenedor Docker. El **API Gateway** funciona como punto de entrada único para los clientes.
