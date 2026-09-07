@@ -71,12 +71,42 @@ Para lograrlo, el sistema adopta un enfoque modular basado en microservicios, bu
 
 
  Servicios del sistema
-- 
-- 
-- 
+- Los principales servicios del sistema de gestión académica son:
+
+1. Docentes: Gestiona la información de los profesores: cédula, nombre, correo, departamento y género. Es el punto de partida de la relación académica, ya que cada curso depende de un docente responsable.
+2. Cursos: Administra los cursos ofrecidos (código, nombre, créditos, semestre).
+3. Estudiantes: Gestiona los datos de los estudiantes matriculados en el sistema: cédula, nombre, correo y programa académico al que pertenecen.
+4. Matrículas: Gestiona la matrícula que hacen los estudiantes.
+5. Notas: Almacena las calificaciones asociadas a cada matrícula.
+
+### ¿Qué partes pueden trabajar por separado?
+
+Cada microservicio es independiente en su desarrollo porque tiene su propia base de datos, su propia lógica de negocio y cada uno va a tener su propio contenedor Docker.
+
+### ¿Qué procesos son independientes?
+
+* El proceso de *despliegue* de cada microservicio es independiente, debido a que cada uno cuenta con su propio Dockerfile.
+* El proceso de *modelado de base de datos* de cada uno de ellos es independiente y no existe un bloqueo mutuo.
+* El proceso de *pruebas* para cada microservicio se puede dar de manera aislada e independiente.
 
  Comunicación entre servicios
-...
+La comunicación entre los microservicios funcionara de manera *síncrona*, usando peticiones *HTTP/REST* se utilizara el formato *JSON*. El *API Gateway* actuara como punto de entrada único: recibe las peticiones del cliente y las enruta al servicio correspondiente según el recurso solicitado:( `/docentes` , `/cursos` , `/estudiantes` , `/matriculas` , `/notas` )..
+
+A su vez hay casos donde un servicio necesita *comunicarse directamente con otro* para validar o completar información, ya que las claves no son solo lógicas osea que no existe una base de datos compartida como Por ejemplo:
+
+1. Matrículas --> Estudiantes y Cursos: antes de que exista una matrícula, el servicio de Matrículas debera consultar al servicio de Estudiantes (¿existe el `estudiante_id`?) y al de Cursos (¿existe el `curso_id`?).
+2. Notas --> Matrículas: antes de registrar una nota, se valida que el `matricula_id` exista.
+
+### ¿Qué formato de datos se utiliza?
+
+los servicios exponen y consumen datos en *JSON*, lo cual facilitara la operatividad entre ellos sin importar que cada uno tenga su propia base de datos independiente.
+
+### ¿Qué pasa si el servicio consultado no responde?
+
+Si, por ejemplo, Matrículas necesita validar un estudiante y el servicio de Estudiantes no responde, la operación de matrícula *no debería completarse* (para no dejar datos inconsistentes), y se debería retornar un error controlado al cliente en lugar de dejar la petición colgada indefinidamente. Por eso es importante:
+
+1. Definir *timeouts* en las peticiones entre servicios.
+2. Retornar códigos de error claros (por ejemplo, `503 Service Unavailable`) cuando un servicio dependiente falla.
 
 ## Tipo de arquitectura
 Se eligió la arquitectura de microservicios porque permite dividir el sistema en servicios independientes, facilitando el mantenimiento y el crecimiento según la demanda. Además, cada módulo puede escalar o actualizarse sin afectar el funcionamiento de los demás. No se eligieron otras arquitecturas porque son menos flexibles para un sistema académico con múltiples procesos.
@@ -95,7 +125,7 @@ Se eligió la arquitectura de microservicios porque permite dividir el sistema e
 
  Tabla: `curso`
 
-A su vez hay casos donde un servicio necesita **comunicarse directamente con otro** para validar o completar información, ya que las claves no son solo lógicas osea que no existe una base de datos compartida como Por ejemplo:
+A su vez hay casos donde un servicio necesita *comunicarse directamente con otro* para validar o completar información, ya que las claves no son solo lógicas osea que no existe una base de datos compartida como Por ejemplo:
 
 
 
