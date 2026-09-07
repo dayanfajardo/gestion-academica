@@ -1,5 +1,32 @@
 # Arquitectura del Sistema: Sistema Académico Distribuido
 
+##  Objetivo del Proyecto
+El propósito principal de este proyecto es diseñar e implementar una plataforma integral para la administración de procesos académicos universitarios, facilitando el control y seguimiento de docentes, cursos, estudiantes, matrículas y calificaciones.
+
+Para lograrlo, el sistema adopta un enfoque modular basado en microservicios, buscando resolver las necesidades clave del entorno educativo:
+* **Autonomía y escalabilidad:** Desacoplar cada área funcional (Docentes, Cursos, Estudiantes, Matrículas y Notas) para que puedan evolucionar y mantenerse de forma independiente.
+* **Punto de acceso unificado:** Centralizar todas las peticiones de los clientes a través de un API Gateway, garantizando una comunicación ordenada y segura.
+* **Aislamiento de datos:** Respaldar cada servicio con su propia base de datos PostgreSQL, asegurando la integridad y disponibilidad de la información sin dependencias directas entre módulos.
+
+
+
+
+
+
+ Integrantes y Roles
+
+| Integrante | Rol en el Proyecto | Responsabilidades Principales |
+| :--- | :--- | :--- |
+| Olver Edinson Arenas Vásquez | Desarrollador | Implementación de microservicios y documentación técnica |
+| Dayan Fajardo | Administrador / DevOps | Gestión del repositorio, control de versiones y revisiones |
+| daniel fernandez | Desarrollador | Desarrollo de microservicios y lógica de negocio |
+| cristian giron | Desarrollador | Pruebas de integración, endpoints y soporte en base de datos |
+
+
+
+
+
+
 ```text
                          ┌─────────────────────┐
                          │       Cliente       │
@@ -22,12 +49,11 @@
              │           │          │          │           │
              ▼           ▼          ▼          ▼           ▼
         PostgreSQL  PostgreSQL PostgreSQL PostgreSQL PostgreSQL
-```
 
----
 
-## Problema que resuelve
 
+
+ Problema que resuelve
 El sistema resuelve la necesidad de centralizar y automatizar la gestión académica de una institución educativa, que sin él tendría que manejarse de forma manual, dispersa o en hojas de cálculo/sistemas aislados.  
 Concretamente resuelve:
 La desconexión entre los distintos procesos académicos (docentes, cursos, estudiantes, matrículas y notas), integrándose bajo una arquitectura común accesible vía API
@@ -40,77 +66,63 @@ Estudiantes: consultando sus matrículas, cursos inscritos y calificaciones.
 ¿Qué pasaría si no existiera?
 Sin este sistema, la institución tendría que depender de procesos manuales o herramientas no integradas que generaría la gestión manual y propensa a errores, procesos lentos y poco escalables, mayor riesgo de inconsistencia de datos.
 
-## Servicios del sistema
 
-Los principales servicios del sistema de gestión académica son:
+ Servicios del sistema
+- 
+- 
+- 
 
-1. **Docentes**: Gestiona la información de los profesores: cédula, nombre, correo, departamento y género. Es el punto de partida de la relación académica, ya que cada curso depende de un docente responsable.
-2. **Cursos**: Administra los cursos ofrecidos (código, nombre, créditos, semestre).
-3. **Estudiantes**: Gestiona los datos de los estudiantes matriculados en el sistema: cédula, nombre, correo y programa académico al que pertenecen.
-4. **Matrículas**: Gestiona la matrícula que hacen los estudiantes.
-5. **Notas**: Almacena las calificaciones asociadas a cada matrícula.
+ Comunicación entre servicios
+...
 
-### ¿Qué partes pueden trabajar por separado?
+## Tipo de arquitectura
+Se eligió la arquitectura de microservicios porque permite dividir el sistema en servicios independientes, facilitando el mantenimiento y el crecimiento según la demanda. Además, cada módulo puede escalar o actualizarse sin afectar el funcionamiento de los demás. No se eligieron otras arquitecturas porque son menos flexibles para un sistema académico con múltiples procesos.
 
-Cada microservicio es independiente en su desarrollo porque tiene su propia base de datos, su propia lógica de negocio y cada uno va a tener su propio contenedor Docker.
+ Modelo de Datos y Dominio
+
+ 1. Servicio de Docentes (`docentes-service`)
+
+ Tabla: `docente`
 
 ### ¿Qué procesos son independientes?
 
-- El proceso de **despliegue** de cada microservicio es independiente, debido a que cada uno cuenta con su propio Dockerfile.
-- El proceso de **modelado de base de datos** de cada uno de ellos es independiente y no existe un bloqueo mutuo.
-- El proceso de **pruebas** para cada microservicio se puede dar de manera aislada e independiente.
 
-## Comunicación entre servicios
 
-La comunicación entre los microservicios funcionara de manera **síncrona**, usando peticiones **HTTP/REST** se utilizara el formato **JSON**. El **API Gateway** actuara como punto de entrada único: recibe las peticiones del cliente y las enruta al servicio correspondiente según el recurso solicitado:(`/docentes`, `/cursos`, `/estudiantes`, `/matriculas`, `/notas`)..
+ 2. Servicio de Cursos (`cursos-service`)
+
+ Tabla: `curso`
 
 A su vez hay casos donde un servicio necesita **comunicarse directamente con otro** para validar o completar información, ya que las claves no son solo lógicas osea que no existe una base de datos compartida como Por ejemplo:
 
-1. **Matrículas --> Estudiantes y Cursos**: antes de que exista una matrícula, el servicio de Matrículas debera consultar al servicio de Estudiantes (¿existe el `estudiante_id`?) y al de Cursos (¿existe el `curso_id`?).
-2. **Notas --> Matrículas**: antes de registrar una nota, se valida que el `matricula_id` exista.
 
-### ¿Qué formato de datos se utiliza?
 
-los servicios exponen y consumen datos en **JSON**, lo cual facilitara la operatividad entre ellos sin importar que cada uno tenga su propia base de datos independiente.
+ 3. Servicio de Estudiantes (`estudiantes-service`)
+
+ Tabla: `estudiante`
 
 ### ¿Qué pasa si el servicio consultado no responde?
 
-Si, por ejemplo, Matrículas necesita validar un estudiante y el servicio de Estudiantes no responde, la operación de matrícula **no debería completarse** (para no dejar datos inconsistentes), y se debería retornar un error controlado al cliente en lugar de dejar la petición colgada indefinidamente. Por eso es importante:
 
-1. Definir **timeouts** en las peticiones entre servicios.
-2. Retornar códigos de error claros (por ejemplo, `503 Service Unavailable`) cuando un servicio dependiente falla.
 
-## Tipo de arquitectura
+ 4. Servicio de Matrículas (`matriculas-service`)
+
+Tabla: `matricula`
 
 Se eligió la arquitectura de microservicios porque permite dividir el sistema en servicios independientes, facilitando el mantenimiento y el crecimiento según la demanda. Además, cada módulo puede escalar o actualizarse sin afectar el funcionamiento de los demás. No se eligieron otras arquitecturas porque son menos flexibles para un sistema académico con múltiples procesos.
 
-# Arquitectura Interna de los Microservicios
 
-Cada microservicio utiliza una estructura modular basada en diferentes capas.
 
-```text
-microservicio/
-│
-├── app.py
-│
-├── src/
-│   ├── routes.py
-│   └── services.py
-│
-├── db.py
-│
-├── requirements.txt
-│
-└── Dockerfile
-```
+ 5. Servicio de Notas (`notas-service`)
+
+ Tabla: `nota`
 
 ...
 
-## Base de datos
 
 ### ¿Qué información debe guardarse?
 
-A continuación se presentan los datos que necesitamos para cada microservicio:
+
+ Relaciones del Sistema
 
 - **Docentes**: Id, cédula (identificación única), nombre, correo institucional, departamento, género (opcional).
 - **Cursos**: Id, código único, nombre, número de créditos, semestre, y el `docente_id` que lo dicta.
@@ -118,7 +130,7 @@ A continuación se presentan los datos que necesitamos para cada microservicio:
 - **Matrículas**: Id, `estudiante_id`, `curso_id`, año lectivo, periodo.
 - **Notas**: Id, `matricula_id`, calificación, observación opcional.
 
-### 1. Servicio de Docentes (`docentes-service`)
+ Docente → Curso
 
 **Tabla:** `docente`
 
@@ -146,7 +158,7 @@ A continuación se presentan los datos que necesitamos para cada microservicio:
 | `semestre`   | `INTEGER`      | `NOT NULL`                           |
 | `docente_id` | `INTEGER`      | `NOT NULL` (Clave foránea lógica)    |
 
----
+
 
 ### 3. Servicio de Estudiantes (`estudiantes-service`)
 
@@ -174,9 +186,9 @@ A continuación se presentan los datos que necesitamos para cada microservicio:
 | `anio`          | `INTEGER`     | `NOT NULL` (Año lectivo)             |
 | `periodo`       | `VARCHAR(10)` | `NOT NULL` (Ej: '1', '2', '2026-1')  |
 
----
 
-### 5. Servicio de Notas (`notas-service`)
+
+  Matrícula → Nota
 
 **Tabla:** `nota`
 
@@ -197,7 +209,6 @@ A continuación se presentan los datos que necesitamos para cada microservicio:
 
 ### ¿Qué pasaría si se pierden?
 
-Al tener bases de datos separadas, la pérdida de algún dato no necesariamente tumba los demás servicios, pero sí se pueden presentar inconsistencias en la lógica de nuestro sistema, por ejemplo:
 
 1. **Se pierden Docentes**: Los cursos quedan con un `docente_id` que ya no existe.
 2. **Se pierden Estudiantes**: Las matrículas quedan con `estudiante_id` huérfanos.
@@ -206,7 +217,8 @@ Al tener bases de datos separadas, la pérdida de algún dato no necesariamente 
 
 ## Usuarios del sistema
 
-### Tipos de usuarios que existen y qué podrán hacer
+
+ Arquitectura Interna de los Microservicios
 
 | Usuario                      | Descripción                                          | Acciones principales                                                              |
 | ---------------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------- |
@@ -214,22 +226,38 @@ Al tener bases de datos separadas, la pérdida de algún dato no necesariamente 
 | **Docente**                  | Profesor responsable de uno o más cursos             | Consultar/gestionar información de sus cursos, registrar notas de sus estudiantes |
 | **Estudiante**               | Usuario matriculado en uno o más cursos              | Consultar sus matrículas, cursos inscritos y calificaciones                       |
 
-### ¿Todos los usuarios acceden de la misma forma?
+```text
+microservicio/
+│
+├── app.py
+│
+├── src/
+│   ├── routes.py
+│   └── services.py
+│
+├── db.py
+│
+├── requirements.txt
+│
+└── Dockerfile
+```
+
+ Responsabilidad de cada componente
 
 No. Aunque todos ingresan a través del mismo **API Gateway**, el nivel de acceso depende del rol: un estudiante solo debería poder **consultar** su propia información (matrículas y notas), mientras que el personal administrativo y los docentes tienen permisos para **crear y modificar** datos (cursos, matrículas, notas, según corresponda a su rol).
 
-## Riesgos y fallas posibles
+
 
 ### Fallas en un servicio (ejemplo: servicio de Notas)
 
 Si se presentan fallas, por ejemplo, en el servicio de Notas, las demás funcionalidades (matricular, consultar docentes/cursos) siguen funcionando, pero cualquier operación que dependa de Notas (consultar calificaciones) fallará: el Gateway enruta la petición, pero no se obtendría respuesta.
 
-**Solución:**
 
 - Implementar un endpoint `/health` en cada servicio; de esta forma el Gateway sabrá qué servicios se encuentran disponibles.
 - Si el servicio se está reiniciando y no está caído, se necesitaría la implementación de **reintentos exponenciales**, en donde se esperaría cada vez más tiempo entre cada intento fallido de conexión.
 
-### Fallas en la base de datos
+
+
 
 Si hay fallos en la base de datos se generarían inconsistencias en la lógica de nuestro sistema, ya que se pierden referencias a datos que se encuentran en las demás bases de datos.
 
