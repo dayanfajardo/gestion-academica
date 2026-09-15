@@ -42,6 +42,8 @@ def fetch_teacher_by_id(teacher_id):
     cursor.execute(sql, (teacher_id,))
     teacher = cursor.fetchone()
     
+    #TODO: pdte agrear rowcount
+    
     cursor.close()
     connection.close()
     
@@ -119,7 +121,12 @@ def delete_teacher_by_id(teacher_id):
 
   sql = 'DELETE FROM docente WHERE id = %s'
   cursor.execute(sql, (teacher_id,))
+
+  deleted = cursor.rowcount > 0
+  
   connection.commit()
 
   cursor.close()
   connection.close()
+
+  return deleted
