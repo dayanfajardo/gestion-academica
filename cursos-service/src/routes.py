@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, abort
 from src.services import (
     fetch_all_courses,
     create_new_course,
@@ -18,6 +18,9 @@ def get_courses():
 @cursos_bp.route('/cursos', methods=['POST'])
 def create_course():
     body = request.get_json()
+    if not body or not body.get('codigo'):
+        abort(400, description='El campo de codigo es obligatorio.')
+        
     create_new_course(body)
     return jsonify({'Mensaje': 'Curso creado con éxito'}), 201
 
@@ -26,23 +29,26 @@ def create_course():
 def get_course(id):
     course = fetch_course_by_id(id)
     if not course:
-        return jsonify({'error': 'Curso no encontrado'}), 404
+        abort(404, description=f'Curso con ID {id} no fue encontrado.')
     return jsonify(course), 200
 
 #* ruta para actualizar un curso
 @cursos_bp.route('/cursos/<id>', methods=['PUT'])
 def update_course(id):
-    body = request.get_json()
-    update_course_by_id(id, body)
+    body = request.get_json()    
+    if not body:
+        abort(400, description='Debe llenar los campos por favor.')        
+    updated = update_course_by_id(id, body)
+    if not updated:
+        abort(404, description=f'Curso con ID {id} no fue encontrado.')    
     return jsonify({'mensaje': 'Curso actualizado con éxito', 'id': id}), 200
 
 #* ruta para eliminar un curso
 @cursos_bp.route('/cursos/<id>', methods=['DELETE'])
 def delete_course(id):
-    delete_course_by_id(id)
+    deleted = delete_course_by_id(id)
+    if not deleted:
+        abort(404, description=f'Curso con ID {id} no fue encontrado.')
     return jsonify({'mensaje': 'Curso eliminado con éxito', 'id': id}), 200
     
-    
-    
-    
-    
+

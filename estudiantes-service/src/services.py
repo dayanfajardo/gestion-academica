@@ -100,10 +100,15 @@ def update_student_by_id(student_id, data):
         data.get('programa'),
         student_id
     ))
+    
+    updated = cursor.rowcount > 0
+    
     connection.commit()    
     
     cursor.close()
     connection.close()
+    
+    return updated
 
 #* Borrar un estudiante por id 
 def delete_student_by_id(student_id):
@@ -113,10 +118,15 @@ def delete_student_by_id(student_id):
     
     sql = "DELETE FROM estudiante WHERE id = %s"
     cursor.execute(sql, (student_id,))
+    
+    deleted = cursor.rowcount > 0
+    
     connection.commit()
     
     cursor.close()
     connection.close()
+    
+    return deleted
     
     
     

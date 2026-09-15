@@ -104,24 +104,31 @@ def update_course_by_id(course_id, data):
         course_id       
     ))
     
+    updated = cursor.rowcount > 0
+    
     connection.commit()
     
     cursor.close()
     connection.close()
+    
+    return updated
 
 #* Borrar curso por id    
-def delete_course_by_id(course_id):
-    
+def delete_course_by_id(course_id):    
     connection = connect_db()
     cursor = connection.cursor()
     
     sql = "DELETE FROM curso WHERE id = %s"
     cursor.execute(sql,(course_id,))
-    connection.commit()
     
+    deleted = cursor.rowcount > 0
+    
+    connection.commit()    
         
     cursor.close()
     connection.close()
+    
+    return deleted
     
 
 

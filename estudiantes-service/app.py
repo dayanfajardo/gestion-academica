@@ -1,11 +1,15 @@
 from flask import Flask
+
 from src.routes import estudiantes_bp
+from src.errors import register_error_handlers
 from db import init_db
 
 app = Flask(__name__)
 
 # Registramos las rutas del módulo estudiantes
 app.register_blueprint(estudiantes_bp)
+
+register_error_handlers()
 
 init_db()
 
