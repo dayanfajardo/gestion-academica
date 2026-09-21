@@ -93,11 +93,12 @@ def update_grade_by_id(grade_id, data):
         data.get('observacion'),
         grade_id
     ))
-    
+    updated = cursor.rowcount > 0
     connection.commit()
     
     cursor.close()
     connection.close()
+    return updated
 
 #* Eliminamos por id
 def delete_grade_by_id(grade_id):
@@ -108,7 +109,9 @@ def delete_grade_by_id(grade_id):
     sql = "DELETE FROM nota WHERE id = %s"
     
     cursor.execute(sql, (grade_id,))
+    deleted = cursor.rowcount > 0
     connection.commit()
     
     cursor.close()
     connection.close()
+    return deleted

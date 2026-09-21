@@ -95,10 +95,12 @@ def update_enrollment_by_id(enrollment_id, data):
         data.get('periodo'),
         enrollment_id
     ))
+    updated = cursor.rowcount > 0
     connection.commit()
     
     cursor.close()
     connection.close()
+    return updated
 
 # * Eliminamos matricula por id
 def delete_enrollment_by_id(enrollment_id):
@@ -108,8 +110,10 @@ def delete_enrollment_by_id(enrollment_id):
     
     sql = "DELETE FROM matricula WHERE id = %s"
     cursor.execute(sql, (enrollment_id,))
+    deleted = cursor.rowcount > 0
     
     connection.commit()
     
     cursor.close()
     connection.close()
+    return deleted
