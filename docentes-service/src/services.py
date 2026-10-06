@@ -84,10 +84,7 @@ def create_new_teacher(data):
     connection.close()  
     
 #* 4. Actualizar docente
-    # Esta función recibe dos parámetros:
-    # teacher_id -> el ID del docente que queremos actualizar.
-    # data -> contiene los nuevos datos del docente,    
-    #"Voy a crear una función llamada update_teacher_by_id que necesita recibir dos datos."
+    
 def update_teacher_by_id(teacher_id, data):
     
     connection = connect_db()
@@ -98,8 +95,6 @@ def update_teacher_by_id(teacher_id, data):
         WHERE id = %s
     """
     
-    # Ejecutamos la consulta SQL y enviamos los valores
-    # que reemplazarán los %s de la consulta.
     cursor.execute(sql, (
         data.get('cedula'),        # Nuevo número de cédula
         data.get('nombre'),        # Nuevo nombre
@@ -108,10 +103,15 @@ def update_teacher_by_id(teacher_id, data):
         data.get('genero'),        # Nuevo género
         teacher_id                 # ID del docente que queremos modificar
     ))
+    
+    updated = cursor.rowcount > 0
+    
     connection.commit()
  
     cursor.close()
     connection.close()
+    
+    return updated
     
 
 #* Elimino docente

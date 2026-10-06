@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 app.register_blueprint(cursos_bp)
 
-register_error_handlers()
+register_error_handlers(app)
 
 init_db()
 
