@@ -1,5 +1,6 @@
 
 services:
+  #* Docentes: Bases de datos y servicio
   docentes-db:    
     image: postgres:15-alpine
     environment:
@@ -25,6 +26,7 @@ services:
     depends_on: 
       - docentes-db
 
+  #* Cursos: Bases de datos y servicio
   cursos-db:    
     image: postgres:15-alpine
     environment:
@@ -50,6 +52,7 @@ services:
     depends_on: 
       - cursos-db
 
+  #* Estudiantes: Bases de datos y servicio
   estudiantes-db:    
     image: postgres:15-alpine
     environment:
@@ -75,6 +78,7 @@ services:
     depends_on: 
       - estudiantes-db
 
+  #* Matriculas: Bases de datos y servicio
   matriculas-db:    
     image: postgres:15-alpine
     environment:
@@ -100,6 +104,7 @@ services:
     depends_on: 
       - matriculas-db
 
+  #* Notas: Bases de datos y servicio
   notas-db:    
     image: postgres:15-alpine
     environment:
@@ -139,6 +144,7 @@ services:
       - matriculas-service
       - notas-service
 
+#* Volumenes globales, Docentes:
 volumes: 
   docentes_data:
   cursos_data:
