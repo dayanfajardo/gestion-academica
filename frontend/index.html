@@ -1,61 +1,271 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sistema de Gestion Academica</title>
+    <title>Sistema Académico Distribuido</title>
+    <style>
+      .oculta { display: none; }
+    </style>
   </head>
   <body>
-    <!-- Encabezado -->
-    <header>
-      <center>
-        <h1>Bienvenido al Sistema de Gestion Academica</h1>
-      </center>
+    <header class="encabezado">
+      <div class="contenedor">
+        <h1>Sistema Académico Distribuido</h1>
+        <p class="subtitulo">Gestión académica mediante microservicios</p>
+      </div>
     </header>
 
-    <hr />
-    <main>
-      <!-- propósito del sistema -->
-      <section>
-        <h2>¿Qué es el Sistema de Gestión Académica?</h2>
+    <nav class="menu">
+      <div class="contenedor menu-enlaces">
+        <button type="button" class="enlace-activo" data-vista="inicio">Inicio</button>
+        <button type="button" data-vista="docentes">Docentes</button>
+        <button type="button" data-vista="cursos">Cursos</button>
+        <button type="button" data-vista="estudiantes">Estudiantes</button>
+        <button type="button" data-vista="matriculas">Matrículas</button>
+        <button type="button" data-vista="notas">Notas</button>
+      </div>
+    </nav>
 
-        <p>
-          El propósito de esta herramienta es tener un sistema que pueda
-          facilitar la gestión académica de la institución, con el fin de
-          administrar de forma organizada la informacion de los
-          docentes,cursos,estudiantes, matriculas, y notas,todo esto desde un
-          mismo sistema.
+    <main class="contenedor">
+      <div id="alerta" class="alerta oculta"></div>
+
+      <!-- INICIO -->
+      <section id="vista-inicio" class="vista">
+        <h2>Módulos del sistema</h2>
+        <p class="intro">
+          Cada módulo se comunica con el API Gateway. El Gateway redirige la
+          petición al microservicio correspondiente.
         </p>
+        <div class="tarjetas">
+          <article class="tarjeta" data-vista="docentes">
+            <h3>Docentes</h3>
+            <p>Gestión de docentes registrados en el sistema.</p>
+          </article>
+          <article class="tarjeta" data-vista="cursos">
+            <h3>Cursos</h3>
+            <p>Administración de los cursos académicos.</p>
+          </article>
+          <article class="tarjeta" data-vista="estudiantes">
+            <h3>Estudiantes</h3>
+            <p>Gestión de estudiantes.</p>
+          </article>
+          <article class="tarjeta" data-vista="matriculas">
+            <h3>Matrículas</h3>
+            <p>Inscripción de estudiantes en cursos.</p>
+          </article>
+          <article class="tarjeta" data-vista="notas">
+            <h3>Notas</h3>
+            <p>Registro de calificaciones.</p>
+          </article>
+        </div>
       </section>
-      <hr />
-      <!-- módulos del sistema -->
-      <section>
-        <h2>MODULOS QUE ENCONTRARAS</h2>
-        <ul>
-          <li>Docentes</li>
-          <li>Cursos</li>
-          <li>Estudiantes</li>
-          <li>Matriculas</li>
-          <li>Notas</li>
-        </ul>
+
+      <!-- DOCENTES -->
+      <section id="vista-docentes" class="vista oculta">
+        <h2>Docentes</h2>
+        <form id="form-docente" class="formulario">
+          <input type="hidden" id="docente-id" />
+          <label>Cédula<input type="text" id="docente-cedula" required /></label>
+          <label>Nombre<input type="text" id="docente-nombre" required /></label>
+          <label>Correo<input type="email" id="docente-correo" required /></label>
+          <label>Departamento<input type="text" id="docente-departamento" required /></label>
+          <label>
+            Género
+            <select id="docente-genero">
+              <option value="">Seleccione</option>
+              <option value="Femenino">Femenino</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </label>
+          <div class="acciones-form">
+            <button type="submit" class="boton">Guardar</button>
+            <button type="button" class="boton boton-secundario" id="cancelar-docente">Cancelar</button>
+          </div>
+        </form>
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Cédula</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Departamento</th>
+                <th>Género</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-docentes"></tbody>
+          </table>
+        </div>
       </section>
-      <hr />
-      <!-- integrantes del proyecto -->
-      <section>
-        <h2>Integrantes a Cargo</h2>
-        <ul>
-          <li>Dayan fajardo Ordoñez</li>
-          <li>Cristian Fernando Angulo Girón</li>
-          <li>Olver Arenas</li>
-          <li>Victor Daniel Fernandez</li>
-        </ul>
+
+      <!-- CURSOS -->
+      <section id="vista-cursos" class="vista oculta">
+        <h2>Cursos</h2>
+        <form id="form-curso" class="formulario">
+          <input type="hidden" id="curso-id" />
+          <label>Código<input type="text" id="curso-codigo" required /></label>
+          <label>Nombre<input type="text" id="curso-nombre" required /></label>
+          <label>Créditos<input type="number" id="curso-creditos" min="1" required /></label>
+          <label>Semestre<input type="number" id="curso-semestre" min="1" required /></label>
+          <label>
+            Docente
+            <select id="curso-docente" required></select>
+          </label>
+          <div class="acciones-form">
+            <button type="submit" class="boton">Guardar</button>
+            <button type="button" class="boton boton-secundario" id="cancelar-curso">Cancelar</button>
+          </div>
+        </form>
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Créditos</th>
+                <th>Semestre</th>
+                <th>Docente</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-cursos"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ESTUDIANTES -->
+      <section id="vista-estudiantes" class="vista oculta">
+        <h2>Estudiantes</h2>
+        <form id="form-estudiante" class="formulario">
+          <input type="hidden" id="estudiante-id" />
+          <label>Cédula<input type="text" id="estudiante-cedula" required /></label>
+          <label>Nombre<input type="text" id="estudiante-nombre" required /></label>
+          <label>Correo<input type="email" id="estudiante-correo" required /></label>
+          <label>Programa<input type="text" id="estudiante-programa" required /></label>
+          <div class="acciones-form">
+            <button type="submit" class="boton">Guardar</button>
+            <button type="button" class="boton boton-secundario" id="cancelar-estudiante">Cancelar</button>
+          </div>
+        </form>
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Cédula</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Programa</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-estudiantes"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- MATRÍCULAS -->
+      <section id="vista-matriculas" class="vista oculta">
+        <h2>Matrículas</h2>
+        <form id="form-matricula" class="formulario">
+          <input type="hidden" id="matricula-id" />
+          <label>
+            Estudiante
+            <select id="matricula-estudiante" required></select>
+          </label>
+          <label>
+            Curso
+            <select id="matricula-curso" required></select>
+          </label>
+          <label>Año<input type="number" id="matricula-anio" min="2000" required /></label>
+          <label>
+            Periodo
+            <select id="matricula-periodo" required>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+          </label>
+          <div class="acciones-form">
+            <button type="submit" class="boton">Guardar</button>
+            <button type="button" class="boton boton-secundario" id="cancelar-matricula">Cancelar</button>
+          </div>
+        </form>
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Estudiante</th>
+                <th>Curso</th>
+                <th>Año</th>
+                <th>Periodo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-matriculas"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- NOTAS -->
+      <section id="vista-notas" class="vista oculta">
+        <h2>Notas</h2>
+        <form id="form-nota" class="formulario">
+          <input type="hidden" id="nota-id" />
+          <label>
+            Matrícula
+            <select id="nota-matricula" required></select>
+          </label>
+          <label>Calificación<input type="number" id="nota-calificacion" step="0.01" required /></label>
+          <label>Observación<input type="text" id="nota-observacion" /></label>
+          <div class="acciones-form">
+            <button type="submit" class="boton">Guardar</button>
+            <button type="button" class="boton boton-secundario" id="cancelar-nota">Cancelar</button>
+          </div>
+        </form>
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Matrícula</th>
+                <th>Calificación</th>
+                <th>Observación</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-notas"></tbody>
+          </table>
+        </div>
       </section>
     </main>
-    <hr />
-    <footer>
-      <center>
-        <p>Proyecto Academico Sistemas Distribuidos</p>
-      </center>
+
+    <footer class="pie">
+      <p>Proyecto académico de Sistemas Distribuidos</p>
     </footer>
+
+    <script>
+      // Nginx sirve .css y .js como text/plain. Los cargamos como texto y los insertamos.
+      (async function cargarRecursos() {
+        const css = await fetch('css/styles.css').then(function (respuesta) {
+          return respuesta.text();
+        });
+        const estilo = document.createElement('style');
+        estilo.textContent = css;
+        document.head.appendChild(estilo);
+
+        const js = await fetch('js/app.js').then(function (respuesta) {
+          return respuesta.text();
+        });
+        const script = document.createElement('script');
+        script.textContent = js;
+        document.body.appendChild(script);
+      })();
+    </script>
   </body>
 </html>
