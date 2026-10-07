@@ -1,5 +1,15 @@
+import requests
+import os
+
 from db import connect_db
 
+MATRICULAS_SERVICE_URL = os.getenv('MATRICULAS_SERVICE_URL')
+
+def enrollment_exists(enrollment_id):
+    url = f"{MATRICULAS_SERVICE_URL}/matriculas/{enrollment_id}"
+    response = requests.get(url, timeout=5)
+    
+    return response.status_code == 200 
 
 #* Obtener todas las notas
 def fetch_all_grades():
@@ -21,7 +31,7 @@ def fetch_all_grades():
         lista.append({
             'id': item[0],
             'matricula_id': item[1],
-            'calificacion': item[2],
+            'calificacion': float(item[2]),
             'observacion': item[3]
         })
     
@@ -32,6 +42,12 @@ def fetch_all_grades():
 #* Crear nueva nota
 def create_new_grade(data):
     
+    #Aqui guardo el id de matricula
+    enrollment_id = data.get('matricula_id')
+    
+    if not enrollment_exists(enrollment_id):
+        return 'enrollment_not_found'
+        
     connection = connect_db()
     cursor = connection.cursor()
     
@@ -40,7 +56,7 @@ def create_new_grade(data):
         VALUES (%s, %s, %s)
     """
     cursor.execute(sql, (
-        data.get('matricula_id'),
+        enrollment_id,
         data.get('calificacion'),
         data.get('observacion')
     ))
@@ -49,6 +65,8 @@ def create_new_grade(data):
     
     cursor.close()
     connection.close()
+    
+    return 'created'
     
 #* Buscamos una nota por id
 def fetch_grade_by_id(grade_id):
@@ -72,12 +90,17 @@ def fetch_grade_by_id(grade_id):
     return {
         'id': grade[0],
         'matricula_id': grade[1],
-        'calificacion': grade[2],
+        'calificacion': float(grade[2]),
         'observacion': grade[3]
     }
     
 #* Actualizamos nota por id
 def update_grade_by_id(grade_id, data):
+
+    enrollment_id = data.get('matricula_id')
+
+    if not enrollment_exists(enrollment_id):
+        return 'enrollment_not_found'
     
     connection = connect_db()
     cursor = connection.cursor()    
@@ -88,16 +111,20 @@ def update_grade_by_id(grade_id, data):
         WHERE id = %s
     """
     cursor.execute(sql, (
-        data.get('matricula_id'),
+        enrollment_id,
         data.get('calificacion'),
         data.get('observacion'),
         grade_id
     ))
+
+    updated = cursor.rowcount > 0
     
     connection.commit()
     
     cursor.close()
     connection.close()
+
+    return updated
 
 #* Eliminamos por id
 def delete_grade_by_id(grade_id):
@@ -108,7 +135,12 @@ def delete_grade_by_id(grade_id):
     sql = "DELETE FROM nota WHERE id = %s"
     
     cursor.execute(sql, (grade_id,))
+
+    deleted = cursor.rowcount > 0
+
     connection.commit()
     
     cursor.close()
     connection.close()
+
+    return deleted

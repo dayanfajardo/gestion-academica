@@ -1,6 +1,6 @@
 import os
 import requests
-
+    
 from db import connect_db
 
 ESTUDIANTES_SERVICE_URL = os.getenv('ESTUDIANTES_SERVICE_URL')
@@ -116,6 +116,14 @@ def fetch_enrollment_by_id(enrollment_id):
 # * Actualizamos matricula por id
 def update_enrollment_by_id(enrollment_id, data):
     
+    student_id = data.get('estudiante_id')
+    if not student_exists(student_id):
+        return 'student_not_found'
+
+    course_id = data.get('curso_id')
+    if not course_exists(course_id):
+        return 'course_not_found'
+
     connection = connect_db()
     cursor = connection.cursor()
     
@@ -125,16 +133,21 @@ def update_enrollment_by_id(enrollment_id, data):
         WHERE id = %s
     """
     cursor.execute(sql, (
-        data.get('estudiante_id'),
-        data.get('curso_id'),
+        student_id,
+        course_id,
         data.get('anio'),
         data.get('periodo'),
         enrollment_id
     ))
+
+    updated = cursor.rowcount > 0
+
     connection.commit()
     
     cursor.close()
     connection.close()
+
+    return updated
 
 # * Eliminamos matricula por id
 def delete_enrollment_by_id(enrollment_id):
@@ -144,8 +157,12 @@ def delete_enrollment_by_id(enrollment_id):
     
     sql = "DELETE FROM matricula WHERE id = %s"
     cursor.execute(sql, (enrollment_id,))
+
+    deleted = cursor.rowcount > 0
     
     connection.commit()
     
     cursor.close()
     connection.close()
+
+    return deleted

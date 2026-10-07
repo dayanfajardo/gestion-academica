@@ -1,4 +1,15 @@
+import os
+import requests
+
 from db import connect_db
+
+DOCENTES_SERVICE_URL = os.getenv('DOCENTES_SERVICE_URL')
+
+def teacher_exists(teacher_id):
+    url = f"{DOCENTES_SERVICE_URL}/docentes/{teacher_id}"
+    response = requests.get(url, timeout=5)
+
+    return response.status_code == 200
 
 #* Obtenemos todos los cursos
 def fetch_all_courses():
@@ -35,6 +46,11 @@ def fetch_all_courses():
 #* Creamos un nuevo curso
 def create_new_course(data):
     
+    teacher_id = data.get('docente_id')
+    
+    if not teacher_exists(teacher_id):
+        return 'teacher_not_found'
+    
     connection = connect_db()
     cursor = connection.cursor()
     
@@ -47,13 +63,15 @@ def create_new_course(data):
         data.get('nombre'),
         data.get('creditos'),
         data.get('semestre'),
-        data.get('docente_id')
+        teacher_id
     ))
     
     connection.commit()
     
     cursor.close()
     connection.close()
+    
+    return 'created'
     
 #* Buscamos un curso por id
 def fetch_course_by_id(course_id):
@@ -86,6 +104,11 @@ def fetch_course_by_id(course_id):
     
 #* Actualizar curso
 def update_course_by_id(course_id, data):
+
+    teacher_id = data.get('docente_id')
+
+    if not teacher_exists(teacher_id):
+        return 'teacher_not_found'
     
     connection = connect_db()
     cursor = connection.cursor()
@@ -100,7 +123,7 @@ def update_course_by_id(course_id, data):
         data.get('nombre'),
         data.get('creditos'),
         data.get('semestre'),
-        data.get('docente_id'),
+        teacher_id,
         course_id       
     ))
     

@@ -15,6 +15,7 @@ services:
   docentes-service:
     build: ./docentes-service
     container_name: docentes_service
+    restart: on-failure
     environment: 
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -41,16 +42,19 @@ services:
   cursos-service:
     build: ./cursos-service
     container_name: cursos_service
+    restart: on-failure
     environment: 
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME_CURSOS}
       DB_HOST: cursos-db
-      DB_PORT: ${DB_PORT}    
+      DB_PORT: ${DB_PORT}
+      DOCENTES_SERVICE_URL: "http://docentes-service:5001"    
     ports:
       - "5002:5002"
     depends_on: 
       - cursos-db
+      - docentes-service
 
   #* Estudiantes: Bases de datos y servicio
   estudiantes-db:    
@@ -67,6 +71,7 @@ services:
   estudiantes-service:
     build: ./estudiantes-service
     container_name: estudiantes_service
+    restart: on-failure
     environment: 
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -93,18 +98,21 @@ services:
   matriculas-service:
     build: ./matriculas-service
     container_name: matriculas_service
+    restart: on-failure
     environment: 
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME_MATRICULAS}
       DB_HOST: matriculas-db
       DB_PORT: ${DB_PORT}
-      ESTUDIANTES_SERVICE_URL: "http://estudiantes_service:5003"
-      CURSOS_SERVICE_URL: "http://cursos_service:5002"
+      ESTUDIANTES_SERVICE_URL: "http://estudiantes-service:5003"
+      CURSOS_SERVICE_URL: "http://cursos-service:5002"
     ports:
       - "5004:5004"
     depends_on: 
       - matriculas-db
+      - estudiantes-service
+      - cursos-service
 
   #* Notas: Bases de datos y servicio
   notas-db:    
@@ -121,16 +129,19 @@ services:
   notas-service:
     build: ./notas-service
     container_name: notas_service
+    restart: on-failure
     environment: 
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME_NOTAS}
       DB_HOST: notas-db
-      DB_PORT: ${DB_PORT}    
+      DB_PORT: ${DB_PORT}
+      MATRICULAS_SERVICE_URL: "http://matriculas-service:5004"    
     ports:
       - "5005:5005"
     depends_on: 
       - notas-db
+      - matriculas-service
   
   gateway:
     build: ./gateway

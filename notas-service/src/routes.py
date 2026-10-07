@@ -16,7 +16,17 @@ def get_grades():
 @notasbp.route('/notas', methods=['POST'])
 def create_grade():
     body = request.get_json()
-    create_new_grade(body)
+
+    if not body:
+        return jsonify({'error': 'Debe llenar los campos por favor.'}), 400
+    
+    result = create_new_grade(body)
+    
+    if result == 'enrollment_not_found':
+        return jsonify({
+            'error': 'La matrícula no existe'
+        }), 400
+    
     return jsonify({'mensaje': 'La nota fue creada con éxito'}),201
 
 @notasbp.route('/notas/<id>', methods=['GET'])
@@ -29,10 +39,24 @@ def get_grade(id):
 @notasbp.route('/notas/<id>', methods=['PUT'])
 def update_grade(id):
     body = request.get_json()
-    update_grade_by_id(id, body)
+    if not body:
+        return jsonify({'error': 'Debe llenar los campos por favor.'}), 400
+
+    result = update_grade_by_id(id, body)
+
+    if result == 'enrollment_not_found':
+        return jsonify({
+            'error': 'La matrícula no existe'
+        }), 400
+
+    if not result:
+        return jsonify({'mensaje': 'La nota no está en la base de datos'}), 404
+
     return jsonify({'mensaje': 'La nota se actualizó correctamente', 'id': id}), 200
 
 @notasbp.route('/notas/<id>', methods=['DELETE'])
 def delete_grade(id):
-    delete_grade_by_id(id)
+    deleted = delete_grade_by_id(id)
+    if not deleted:
+        return jsonify({'mensaje': 'La nota no está en la base de datos'}), 404
     return jsonify({'mensaje': 'La nota se eliminó correctamente', 'id': id}), 200

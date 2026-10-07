@@ -14,15 +14,22 @@ cursos_bp = Blueprint('cursos', __name__)
 def get_courses():
     return jsonify(fetch_all_courses()), 200
 
-#* Ruta para crear un curso
+# * Ruta para crear un curso
 @cursos_bp.route('/cursos', methods=['POST'])
 def create_course():
     body = request.get_json()
+
     if not body or not body.get('codigo'):
-        abort(400, description='El campo de codigo es obligatorio.')
-        
-    create_new_course(body)
-    return jsonify({'Mensaje': 'Curso creado con éxito'}), 201
+        abort(400, description='El campo codigo es obligatorio.')
+
+    result = create_new_course(body)
+
+    if result == 'teacher_not_found':
+        abort(400, description='El docente no existe.')
+
+    return jsonify({
+        'mensaje': 'Curso creado con éxito'
+    }), 201
 
 #* Ruta para buscar un curso por id
 @cursos_bp.route('/cursos/<id>', methods=['GET'])
@@ -39,6 +46,10 @@ def update_course(id):
     if not body:
         abort(400, description='Debe llenar los campos por favor.')        
     updated = update_course_by_id(id, body)
+
+    if updated == 'teacher_not_found':
+        abort(400, description='El docente no existe.')
+
     if not updated:
         abort(404, description=f'Curso con ID {id} no fue encontrado.')    
     return jsonify({'mensaje': 'Curso actualizado con éxito', 'id': id}), 200
