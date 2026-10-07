@@ -21,7 +21,7 @@ def create_student():
     create_new_student(body)
     return jsonify({'mensaje': 'Estudiante creado con éxito'}), 201
 
-@estudiantes_bp.route('/estudiantes/<id>', methods=['GET'])
+@estudiantes_bp.route('/estudiantes/<int:id>', methods=['GET'])
 def get_student(id):
     student = fetch_student_by_id(id)
     if not student:

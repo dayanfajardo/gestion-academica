@@ -9,7 +9,7 @@ app = Flask(__name__)
 # Registramos las rutas del módulo estudiantes
 app.register_blueprint(estudiantes_bp)
 
-register_error_handlers()
+register_error_handlers(app)
 
 init_db()
 

@@ -1,6 +1,26 @@
+import os
+import requests
+
 from db import connect_db
 
-# * Consultamos todas las matriculas
+ESTUDIANTES_SERVICE_URL = os.getenv('ESTUDIANTES_SERVICE_URL')
+CURSOS_SERVICE_URL = os.getenv('CURSOS_SERVICE_URL')
+
+
+def student_exists(student_id):
+    url = f"{ESTUDIANTES_SERVICE_URL}/estudiantes/{student_id}"
+    response = requests.get(url, timeout=5)
+
+    return response.status_code == 200
+
+def course_exists(course_id):
+    url = f"{CURSOS_SERVICE_URL}/cursos/{course_id}"
+    response = requests.get(url, timeout=5)
+    
+    return response.status_code == 200
+    
+
+#* Consultamos todas las matriculas
 def fetch_all_enrollments():
     
     connection = connect_db()
@@ -29,25 +49,41 @@ def fetch_all_enrollments():
 
 # * Creamos nueva matricula
 def create_new_enrollment(data):
-    
+
+    #Aqui guardo en una variable el id del estudiante
+    student_id = data.get('estudiante_id')
+
+    if not student_exists(student_id):
+        return 'student_not_found'
+
+    #Aqui guardo en una variable el id de curso
+    course_id = data.get('curso_id')
+
+    if not course_exists(course_id):
+        return 'course_not_found'
+
     connection = connect_db()
     cursor = connection.cursor()
-    
+
     sql = """
         INSERT INTO matricula (estudiante_id, curso_id, anio, periodo)
         VALUES (%s, %s, %s, %s)
     """
+
     cursor.execute(sql, (
-        data.get('estudiante_id'),
-        data.get('curso_id'),
+        student_id,
+        course_id,
         data.get('anio'),
         data.get('periodo')
     ))
-    
+
     connection.commit()
-    
+
     cursor.close()
     connection.close()
+
+    return 'created'
+
 
 # * Buscamos una matricula por id
 def fetch_enrollment_by_id(enrollment_id):

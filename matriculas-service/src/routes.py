@@ -16,8 +16,22 @@ def get_enrollments():
 @matriculas_bp.route('/matriculas', methods=['POST'])
 def create_enrollment():
     body = request.get_json()
-    create_new_enrollment(body)
-    return jsonify({'mensaje': 'Matricula creada con éxito'}), 201
+
+    result = create_new_enrollment(body)
+
+    if result == 'student_not_found':
+        return jsonify({
+            'error': 'El estudiante no existe'
+        }), 400
+
+    if result == 'course_not_found':
+        return jsonify({
+            'error': 'El curso no existe'
+        }), 400
+
+    return jsonify({
+        'mensaje': 'Matricula creada con éxito'
+    }), 201
 
 @matriculas_bp.route('/matriculas/<id>', methods=['GET'])
 def get_enrollment(id):

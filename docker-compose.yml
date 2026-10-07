@@ -98,7 +98,9 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME_MATRICULAS}
       DB_HOST: matriculas-db
-      DB_PORT: ${DB_PORT}    
+      DB_PORT: ${DB_PORT}
+      ESTUDIANTES_SERVICE_URL: "http://estudiantes_service:5003"
+      CURSOS_SERVICE_URL: "http://cursos_service:5002"
     ports:
       - "5004:5004"
     depends_on: 

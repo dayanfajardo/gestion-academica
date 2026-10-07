@@ -54,6 +54,7 @@ def create_new_student(data):
     cursor.close()
     connection.close()
     
+    
 #* Obtener un estudiante por id
 def fetch_student_by_id(student_id):
     
