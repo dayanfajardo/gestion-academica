@@ -10,11 +10,14 @@ Sistema de gestión académica basado en una **arquitectura de microservicios**,
 - [Arquitectura del sistema](#arquitectura-del-sistema)
 - [Servicios del sistema](#servicios-del-sistema)
 - [Comunicación entre servicios](#comunicación-entre-servicios)
+- [Documentación de endpoints](#documentacion-de-endpoints)
+- [Bases de datos por servicio](#bases-de-datos-por-servicio)
 - [Tipo de arquitectura](#tipo-de-arquitectura)
 - [Modelo de datos y dominio](#modelo-de-datos-y-dominio)
 - [Usuarios del sistema](#usuarios-del-sistema)
 - [Arquitectura interna de los microservicios](#arquitectura-interna-de-los-microservicios)
 - [Manejo de fallas](#manejo-de-fallas)
+- [Configuración de variables de entorno](#configuración-mediante-variables-de-entorno)
 - [Docker](#docker)
 - [Docker-compose](#docker-compose)
 - [Estado del proyecto](#estado-del-proyecto)
@@ -125,6 +128,14 @@ También son independientes los procesos de:
 ---
 ## Comunicación entre servicios
 
+| Servicio  | Responsabilidad | Información administrada | Comunicación con otros servicios
+| --- | --- | --- | --- |
+| **Docentes** | gestiona la información de los profesores | Datos personales |  |
+| **Cursos** | administra los cursos ofrecidos | Información sobre cursos | Docentes,  |
+| **Estudiantes** | gestiona los datos de los estudiantes | Datos personales |  |
+| **Matriculas** | administra la relación entre estudiantes y cursos | Relación estudiante - curso | estudiantes, cursos | 
+| **Notas** | almacena las calificaciones asociadas a cada matrícula | Información académica | Matriculas |
+
 La comunicación entre los microservicios funciona de manera **síncrona** mediante peticiones **HTTP/REST**, utilizando **JSON** como formato de intercambio de datos.
 
 El **API Gateway** recibe las peticiones del cliente y las enruta al servicio correspondiente según el recurso solicitado:
@@ -142,6 +153,44 @@ Algunos servicios también necesitan comunicarse directamente entre sí para val
 1. **Matrículas → Estudiantes y Cursos:** antes de crear una matrícula, se valida que existan el `estudiante_id` y el `curso_id`.
 2. **Notas → Matrículas:** antes de registrar una nota, se valida que exista el `matricula_id`.
 
+
+### El servicio Cursos necesita consultar la información de un docente.
+| Elemento | Descripción | 
+| --- | --- |
+| **Servicio que solicita** | Cursos  |
+| **Servicio que responde** | Docentes |
+| **Endpoint utilizado** | http://docentes-service:5001/docentes/{id_docente} |
+| **Información enviada** | Id Docente |
+| **Información recibida** | Información de docente | 
+
+### El servicio Matrículas necesita consultar la información de un estudiante.
+| Elemento | Descripción | 
+| --- | --- |
+| **Servicio que solicita** | Matrículas  |
+| **Servicio que responde** | Estudiantes |
+| **Endpoint utilizado** | http://estudiantes-service:5003/estudiantes/{id_estudiante} |
+| **Información enviada** | Id estudiante |
+| **Información recibida** | Información del estudiante | 
+
+### El servicio Matrículas necesita consultar la información de un curso.
+| Elemento | Descripción | 
+| --- | --- |
+| **Servicio que solicita** | Matrículas  |
+| **Servicio que responde** | Cursos |
+| **Endpoint utilizado** | http://cursos-service:5002/cursos/{id_curso} |
+| **Información enviada** | Id curso |
+| **Información recibida** | Información del curso | 
+
+### El servicio Notas necesita consultar la información de una matícula.
+| Elemento | Descripción | 
+| --- | --- |
+| **Servicio que solicita** | Notas  |
+| **Servicio que responde** | Matrículas |
+| **Endpoint utilizado** | http://matriculas-service:5004/matriculas/{id_matricula} |
+| **Información enviada** | Id matricula |
+| **Información recibida** | Información de la matrícula | 
+
+---
 ### Formato de datos
 
 Los servicios exponen y consumen información en formato **JSON**, lo que facilita la interoperabilidad entre ellos aunque cada microservicio tenga una base de datos independiente.
@@ -157,11 +206,69 @@ Para manejar este escenario se propone:
 
 ---
 
+## Documentacion de endpoints
+### Servicio Docentes
+| Método  | Endpoint | Descripción | Entrada | Respuesta 
+| --- | --- | --- | --- | --- | 
+| **GET** | /docentes | Consultar docentes | Ninguna | Listado de docentes |
+| **GET** | docentes/{id} | Consultar docente | ID docente | Docente específico | 
+| **POST** | /docentes | Crear docente | JSON docente | Confirmación | 
+| **PUT** | docentes/{id} | Actualizar docente | Json actualizado | Docente modificado |  
+| **DELETE** | /docentes/{id} | Eliminar docente | ID docente | confirmación | 
+
+### Servicio Cursos
+| Método  | Endpoint | Descripción | Entrada | Respuesta 
+| --- | --- | --- | --- | --- | 
+| **GET** | /cursos | Consultar cursos | Ninguna | Listado de cursos |
+| **GET** | cursos/{id} | Consultar curso | ID curso | curso específico | 
+| **POST** | /cursos | Crear curso | JSON curso | Confirmación | 
+| **PUT** | cursos/{id} | Actualizar curso | Json actualizado | curso modificado |  
+| **DELETE** | /cursos/{id} | Eliminar curso | ID curso | confirmación | 
+
+### Servicio Estudiantes
+| Método  | Endpoint | Descripción | Entrada | Respuesta 
+| --- | --- | --- | --- | --- | 
+| **GET** | /estudiantes | Consultar estudiantes | Ninguna | Listado de estudiantes |
+| **GET** | estudiantes/{id} | Consultar estudiante | ID estudiante | estudiante específico | 
+| **POST** | /estudiantes | Crear estudiante | JSON estudiante | Confirmación | 
+| **PUT** | estudiantes/{id} | Actualizar estudiante | Json actualizado | estudiante modificado |  
+| **DELETE** | /estudiantes/{id} | Eliminar estudiante | ID estudiante | confirmación | 
+
+### Servicio Matriculas
+| Método  | Endpoint | Descripción | Entrada | Respuesta 
+| --- | --- | --- | --- | --- | 
+| **GET** | /matriculas | Consultar matriculas | Ninguna | Listado de matriculas |
+| **GET** | matriculas/{id} | Consultar matricula | ID matricula | matricula específico | 
+| **POST** | /matriculas | Crear matricula | JSON matricula | Confirmación | 
+| **PUT** | matriculas/{id} | Actualizar matricula | Json actualizado | matricula modificada |  
+| **DELETE** | /matriculas/{id} | Eliminar matricula | ID matricula | confirmación | 
+
+### Servicio Notas
+| Método  | Endpoint | Descripción | Entrada | Respuesta 
+| --- | --- | --- | --- | --- | 
+| **GET** | /notas | Consultar notas | Ninguna | Listado de notas |
+| **GET** | notas/{id} | Consultar nota | ID nota | nota específica | 
+| **POST** | /notas | Crear nota | JSON nota | Confirmación | 
+| **PUT** | notas/{id} | Actualizar nota | Json actualizado | nota modificada |  
+| **DELETE** | /notas/{id} | Eliminar nota | ID nota | confirmación | 
+---
+
 ## Tipo de arquitectura
 
 Se eligió una **arquitectura de microservicios** porque permite dividir el sistema en servicios independientes, facilitando el mantenimiento, el despliegue y el crecimiento según la demanda.
 
 Cada módulo puede escalar o actualizarse sin afectar directamente a los demás, lo que ofrece mayor flexibilidad frente a una arquitectura monolítica tradicional.
+
+---
+
+## Bases de datos por servicio
+| Servicio  | Base de datos utilizada | Tablas principales |
+| --- | --- | --- | 
+| **Docentes** | PostgreSQL | docente |
+| **Cursos** | PostgreSQL | curso |
+| **Estudiantes** | PostgreSQL | estudiante |
+| **Matrículas** | PostgreSQL | matricula |
+| **Notas** | PostgreSQL | nota |
 
 ---
 
@@ -319,6 +426,20 @@ Una falla o pérdida de información en una base de datos puede generar inconsis
 - Implementar **backups automáticos y periódicos**.
 - Utilizar **réplicas de lectura** en los servicios con mayor volumen de consultas.
 - Monitorear recursos como conexiones activas, espacio en disco y disponibilidad para detectar problemas antes de una caída total.
+
+---
+## Configuración mediante variables de entorno
+| Variable | Uso |
+| --- | --- |
+| `DB_NAME_DOCENTES` | nombre de base de datos del servicio de docentes |
+| `DB_NAME_CURSOS` | nombre de base de datos del servicio de cursos |
+| `DB_NAME_ESTUDIANTES` | nombre de base de datos del servicio de estudiantes |
+| `DB_NAME_MATRICULAS` | nombre de base de datos del servicio de matrículas |
+| `DB_NAME_NOTAS` | nombre de base de datos del servicio de notas |
+| `DB_PORT` | Puerto de conexión a la base de datos |
+| `DB_USER` | Usuario de la base de datos |
+| `DB_PASSWORD` | Contraseña del usuario de la base de datos |
+
 
 ---
 ## Docker
