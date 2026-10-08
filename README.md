@@ -62,10 +62,8 @@ Para lograrlo, el sistema adopta un enfoque modular basado en microservicios:
 
 | Integrante | Rol |
 | --- | --- |
-| **Cristian Girón** | Líder de Proyecto |
-| **Dayan Fajardo** | Líder Técnico / DevOps |
-| **Olver Edinson Arenas Vásquez** | Documentación Técnica |
-| **Daniel Fernández** | Presentación y Comunicación |
+| **Cristian Girón** | Líder de Proyecto, Documentación Técnica |
+| **Dayan Fajardo** | Líder Técnico / DevOps, Presentación y Comunicación|
 
 ---
 
