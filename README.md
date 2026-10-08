@@ -62,10 +62,8 @@ Para lograrlo, el sistema adopta un enfoque modular basado en microservicios:
 
 | Integrante | Rol |
 | --- | --- |
-| **Cristian Girón** | Líder de Proyecto |
-| **Dayan Fajardo** | Líder Técnico / DevOps |
-| **Olver Edinson Arenas Vásquez** | Documentación Técnica |
-| **Daniel Fernández** | Presentación y Comunicación |
+| **Cristian Girón** | Líder de Proyecto, Documentación Técnica |
+| **Dayan Fajardo** | Líder Técnico / DevOps, Presentación y Comunicación|
 
 ---
 
@@ -439,6 +437,17 @@ Una falla o pérdida de información en una base de datos puede generar inconsis
 | `DB_PORT` | Puerto de conexión a la base de datos |
 | `DB_USER` | Usuario de la base de datos |
 | `DB_PASSWORD` | Contraseña del usuario de la base de datos |
+| `DB_HOST_DOCENTES` | dirección del servidor donde está corriendo la base de datos de Docentes  |
+| `DB_HOST_CURSOS` | dirección del servidor donde está corriendo la base de datos de Cursos  |
+| `DB_HOST_ESTUDIANTES` | dirección del servidor donde está corriendo la base de datos de Estudiantes  |
+| `DB_HOST_MATRICULAS` | dirección del servidor donde está corriendo la base de datos de Matrículas  |
+| `DB_HOST_NOTAS` | dirección del servidor donde está corriendo la base de datos de Notas  |
+| `DOCENTES_SERVICE_URL` |  URL del servicio docentes para la comunicación con otros servicios |
+| `CURSOS_SERVICE_URL` |  URL del servicio cursos para la comunicación con otros servicios |
+| `ESTUDIANTES_SERVICE_URL` | URL del servicio estudiantes para la comunicación con otros servicios  |
+| `MATRICULAS_SERVICE_URL` |  URL del servicio matriculas para la comunicación con otros servicios |
+| `NOTAS_SERVICE_URL` |  URL del servicio notas para la comunicación con otros servicios |
+
 
 
 ---
