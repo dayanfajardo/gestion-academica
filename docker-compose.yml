@@ -20,7 +20,7 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME_DOCENTES}
-      DB_HOST: docentes-db
+      DB_HOST: ${DB_HOST_DOCENTES}
       DB_PORT: ${DB_PORT}    
     ports:
       - "5001:5001"
@@ -47,9 +47,9 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME_CURSOS}
-      DB_HOST: cursos-db
+      DB_HOST: ${DB_HOST_CURSOS}
       DB_PORT: ${DB_PORT}
-      DOCENTES_SERVICE_URL: "http://docentes-service:5001"    
+      DOCENTES_SERVICE_URL: ${DOCENTES_SERVICE_URL}    
     ports:
       - "5002:5002"
     depends_on: 
@@ -76,7 +76,7 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME_ESTUDIANTES}
-      DB_HOST: estudiantes-db
+      DB_HOST: ${DB_HOST_ESTUDIANTES}
       DB_PORT: ${DB_PORT}    
     ports:
       - "5003:5003"
@@ -103,10 +103,10 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME_MATRICULAS}
-      DB_HOST: matriculas-db
+      DB_HOST: ${DB_HOST_MATRICULAS}
       DB_PORT: ${DB_PORT}
-      ESTUDIANTES_SERVICE_URL: "http://estudiantes-service:5003"
-      CURSOS_SERVICE_URL: "http://cursos-service:5002"
+      ESTUDIANTES_SERVICE_URL: ${ESTUDIANTES_SERVICE_URL}
+      CURSOS_SERVICE_URL: ${CURSOS_SERVICE_URL}
     ports:
       - "5004:5004"
     depends_on: 
@@ -134,9 +134,9 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME_NOTAS}
-      DB_HOST: notas-db
+      DB_HOST: ${DB_HOST_NOTAS}
       DB_PORT: ${DB_PORT}
-      MATRICULAS_SERVICE_URL: "http://matriculas-service:5004"    
+      MATRICULAS_SERVICE_URL: ${MATRICULAS_SERVICE_URL}   
     ports:
       - "5005:5005"
     depends_on: 
