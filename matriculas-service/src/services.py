@@ -1,25 +1,36 @@
 import os
 
 from db import connect_db
-from src.resilience import call_service
+from src.resilience import create_breaker, call_service, breaker_status
 
 ESTUDIANTES_SERVICE_URL = os.getenv('ESTUDIANTES_SERVICE_URL')
 CURSOS_SERVICE_URL = os.getenv('CURSOS_SERVICE_URL')
 ESTUDIANTES_TIMEOUT = float(os.getenv('ESTUDIANTES_TIMEOUT', '2'))
 CURSOS_TIMEOUT = float(os.getenv('CURSOS_TIMEOUT', '2'))
 
+# Un circuito independiente por dependencia: si cae cursos, estudiantes sigue cerrado
+circuito_estudiantes = create_breaker('estudiantes')
+circuito_cursos = create_breaker('cursos')
+
 
 def student_exists(student_id):
     url = f"{ESTUDIANTES_SERVICE_URL}/estudiantes/{student_id}"
-    response = call_service('estudiantes', url, ESTUDIANTES_TIMEOUT)
+    response = call_service(circuito_estudiantes, 'estudiantes', url, ESTUDIANTES_TIMEOUT)
 
     return response.status_code == 200
 
 def course_exists(course_id):
     url = f"{CURSOS_SERVICE_URL}/cursos/{course_id}"
-    response = call_service('cursos', url, CURSOS_TIMEOUT)
+    response = call_service(circuito_cursos, 'cursos', url, CURSOS_TIMEOUT)
 
     return response.status_code == 200
+
+#* Estado de los circuit breakers hacia estudiantes y cursos
+def fetch_circuit_status():
+    return {
+        'estudiantes': breaker_status(circuito_estudiantes),
+        'cursos': breaker_status(circuito_cursos)
+    }
 
 
 #* Consultamos todas las matriculas

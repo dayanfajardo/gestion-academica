@@ -1,17 +1,22 @@
 import os
 
 from db import connect_db
-from src.resilience import call_service
+from src.resilience import create_breaker, call_service, breaker_status
 
 MATRICULAS_SERVICE_URL = os.getenv('MATRICULAS_SERVICE_URL')
 MATRICULAS_TIMEOUT = float(os.getenv('MATRICULAS_TIMEOUT', '2'))
 
+circuito_matriculas = create_breaker('matriculas')
 
 def enrollment_exists(enrollment_id):
     url = f"{MATRICULAS_SERVICE_URL}/matriculas/{enrollment_id}"
-    response = call_service('matrículas', url, MATRICULAS_TIMEOUT)
+    response = call_service(circuito_matriculas, 'matrículas', url, MATRICULAS_TIMEOUT)
 
     return response.status_code == 200
+
+#* Estado del circuit breaker hacia matrículas
+def fetch_circuit_status():
+    return {'matriculas': breaker_status(circuito_matriculas)}
 
 #* Obtener todas las notas
 def fetch_all_grades():

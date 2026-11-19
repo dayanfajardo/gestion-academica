@@ -33,7 +33,7 @@ def register_error_handlers(app):
             'status': 500
         }), 500
     
-    # Fallas al comunicarse con otros microservicios (timeout)
+    # Fallas al comunicarse con otros microservicios (timeout / circuit breaker)
     @app.errorhandler(DependencyError)
     def handle_dependency_error(e):
         return jsonify({

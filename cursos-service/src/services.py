@@ -1,17 +1,22 @@
 import os
 
 from db import connect_db
-from src.resilience import call_service
+from src.resilience import create_breaker, call_service, breaker_status
 
 DOCENTES_SERVICE_URL = os.getenv('DOCENTES_SERVICE_URL')
 DOCENTES_TIMEOUT = float(os.getenv('DOCENTES_TIMEOUT', '2'))
 
+circuito_docentes = create_breaker('docentes')
 
 def teacher_exists(teacher_id):
     url = f"{DOCENTES_SERVICE_URL}/docentes/{teacher_id}"
-    response = call_service('docentes', url, DOCENTES_TIMEOUT)
+    response = call_service(circuito_docentes, 'docentes', url, DOCENTES_TIMEOUT)
 
     return response.status_code == 200
+
+#* Estado del circuit breaker hacia docentes
+def fetch_circuit_status():
+    return {'docentes': breaker_status(circuito_docentes)}
 
 #* Obtenemos todos los cursos
 def fetch_all_courses():

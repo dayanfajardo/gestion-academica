@@ -4,7 +4,8 @@ from src.services import (
     create_new_grade,
     fetch_grade_by_id,
     update_grade_by_id,
-    delete_grade_by_id
+    delete_grade_by_id,
+    fetch_circuit_status
 )
 
 notasbp = Blueprint('notas', __name__)
@@ -60,3 +61,8 @@ def delete_grade(id):
     if not deleted:
         return jsonify({'mensaje': 'La nota no está en la base de datos'}), 404
     return jsonify({'mensaje': 'La nota se eliminó correctamente', 'id': id}), 200
+
+#* Estado del circuit breaker hacia los servicios de los que depende
+@notasbp.route('/notas/circuito', methods=['GET'])
+def get_circuit_status():
+    return jsonify(fetch_circuit_status()), 200
