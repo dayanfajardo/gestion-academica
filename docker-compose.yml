@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME_DOCENTES}    
     ports: 
-      - "5433:5432"
+      - "15433:5432"
     volumes: 
       - docentes_data:/var/lib/postgresql/data
 
@@ -35,7 +35,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME_CURSOS}
     ports:
-      - "5434:5432"
+      - "15434:5432"
     volumes: 
       - cursos_data:/var/lib/postgresql/data
 
@@ -64,7 +64,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME_ESTUDIANTES}
     ports:
-      - "5435:5432"
+      - "15435:5432"
     volumes: 
       - estudiantes_data:/var/lib/postgresql/data
 
@@ -91,7 +91,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME_MATRICULAS}
     ports:
-      - "5436:5432"
+      - "15436:5432"
     volumes: 
       - matriculas_data:/var/lib/postgresql/data
 
@@ -122,7 +122,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME_NOTAS}    
     ports:
-      - "5437:5432"
+      - "15437:5432"
     volumes: 
       - notas_data:/var/lib/postgresql/data
 
