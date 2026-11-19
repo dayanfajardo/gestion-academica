@@ -4,7 +4,8 @@ from src.services import (
     create_new_course,
     fetch_course_by_id,
     update_course_by_id,
-    delete_course_by_id
+    delete_course_by_id,
+    fetch_circuit_status
 )
 
 cursos_bp = Blueprint('cursos', __name__)
@@ -61,5 +62,8 @@ def delete_course(id):
     if not deleted:
         abort(404, description=f'Curso con ID {id} no fue encontrado.')
     return jsonify({'mensaje': 'Curso eliminado con éxito', 'id': id}), 200
-    
 
+#* Estado del circuit breaker hacia los servicios de los que depende
+@cursos_bp.route('/cursos/circuito', methods=['GET'])
+def get_circuit_status():
+    return jsonify(fetch_circuit_status()), 200
