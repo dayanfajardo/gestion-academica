@@ -1,13 +1,15 @@
 import os
-import requests
 
 from db import connect_db
+from src.resilience import call_service
 
 DOCENTES_SERVICE_URL = os.getenv('DOCENTES_SERVICE_URL')
+DOCENTES_TIMEOUT = float(os.getenv('DOCENTES_TIMEOUT', '2'))
+
 
 def teacher_exists(teacher_id):
     url = f"{DOCENTES_SERVICE_URL}/docentes/{teacher_id}"
-    response = requests.get(url, timeout=5)
+    response = call_service('docentes', url, DOCENTES_TIMEOUT)
 
     return response.status_code == 200
 

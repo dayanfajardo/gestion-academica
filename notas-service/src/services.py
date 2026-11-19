@@ -1,15 +1,17 @@
-import requests
 import os
 
 from db import connect_db
+from src.resilience import call_service
 
 MATRICULAS_SERVICE_URL = os.getenv('MATRICULAS_SERVICE_URL')
+MATRICULAS_TIMEOUT = float(os.getenv('MATRICULAS_TIMEOUT', '2'))
+
 
 def enrollment_exists(enrollment_id):
     url = f"{MATRICULAS_SERVICE_URL}/matriculas/{enrollment_id}"
-    response = requests.get(url, timeout=5)
-    
-    return response.status_code == 200 
+    response = call_service('matrículas', url, MATRICULAS_TIMEOUT)
+
+    return response.status_code == 200
 
 #* Obtener todas las notas
 def fetch_all_grades():

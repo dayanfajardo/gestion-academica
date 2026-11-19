@@ -415,6 +415,26 @@ Como medidas de manejo se propone:
 - Utilizar **timeouts** para evitar peticiones bloqueadas indefinidamente.
 - Retornar códigos HTTP adecuados ante fallas controladas.
 
+### Timeout en la comunicación entre servicios
+
+Las llamadas síncronas entre servicios tienen un **tiempo máximo de espera** configurable, implementado en `src/resilience.py` de cada servicio consumidor:
+
+| Servicio consumidor | Servicio consultado | Variable |
+| --- | --- | --- |
+| Cursos | Docentes | `DOCENTES_TIMEOUT` |
+| Matrículas | Estudiantes y Cursos | `ESTUDIANTES_TIMEOUT`, `CURSOS_TIMEOUT` |
+| Notas | Matrículas | `MATRICULAS_TIMEOUT` |
+
+Respuestas ante fallas del servicio consultado:
+
+| Situación | Código HTTP |
+| --- | --- |
+| Tiempo de espera agotado | `504 Gateway Timeout` |
+| No se pudo conectar | `503 Service Unavailable` |
+| El servicio respondió 5xx | `502 Bad Gateway` |
+
+Un **404** del servicio consultado no es una falla: indica que el recurso no existe (por ejemplo, "El docente no existe").
+
 ### Fallas en la base de datos
 
 Una falla o pérdida de información en una base de datos puede generar inconsistencias debido a las referencias lógicas existentes entre los distintos servicios.
@@ -447,6 +467,10 @@ Una falla o pérdida de información en una base de datos puede generar inconsis
 | `ESTUDIANTES_SERVICE_URL` | URL del servicio estudiantes para la comunicación con otros servicios  |
 | `MATRICULAS_SERVICE_URL` |  URL del servicio matriculas para la comunicación con otros servicios |
 | `NOTAS_SERVICE_URL` |  URL del servicio notas para la comunicación con otros servicios |
+| `DOCENTES_TIMEOUT` | Segundos máximos de espera al consultar Docentes (usado por Cursos) |
+| `CURSOS_TIMEOUT` | Segundos máximos de espera al consultar Cursos (usado por Matrículas) |
+| `ESTUDIANTES_TIMEOUT` | Segundos máximos de espera al consultar Estudiantes (usado por Matrículas) |
+| `MATRICULAS_TIMEOUT` | Segundos máximos de espera al consultar Matrículas (usado por Notas) |
 
 
 
