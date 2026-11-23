@@ -1,4 +1,6 @@
+import math
 import os
+from datetime import datetime, timedelta, timezone
 
 import pybreaker
 import requests
@@ -13,12 +15,22 @@ class DependencyError(Exception):
         self.status = status
 
 
+class RegistroCircuito(pybreaker.CircuitBreakerListener):
+    """Escribe en los logs del contenedor cada cambio de estado del circuito."""
+
+    def state_change(self, cb, old_state, new_state):
+        anterior = old_state.name.upper().replace('-', '_') if old_state else 'NINGUNO'
+        nuevo = new_state.name.upper().replace('-', '_')
+        print(f'[circuit breaker {cb.name}] {anterior} -> {nuevo}', flush=True)
+
+
 def create_breaker(name):
     """Crea un circuit breaker configurado por variables de entorno."""
     return pybreaker.CircuitBreaker(
         fail_max=int(os.getenv('CB_MAX_FALLOS', '3')),
         reset_timeout=int(os.getenv('CB_RECUPERACION', '30')),
         throw_new_error_on_trip=False,
+        listeners=[RegistroCircuito()],
         name=name
     )
 
@@ -51,9 +63,24 @@ def call_service(breaker, service_name, url, timeout):
 
 
 def breaker_status(breaker):
-    """Estado actual del circuito, para el endpoint de monitoreo."""
+    """
+    Estado actual del circuito, para el endpoint de monitoreo.
+    pybreaker solo pasa de OPEN a HALF_OPEN cuando llega una petición, así que
+    si ya pasó el periodo de recuperación se informa HALF_OPEN: la siguiente
+    petición será la de prueba.
+    """
+    estado = breaker.current_state.upper().replace('-', '_')
+    segundos_restantes = 0
+    opened_at = breaker._state_storage.opened_at
+    if estado == 'OPEN' and opened_at:
+        reintento = opened_at + timedelta(seconds=breaker.reset_timeout)
+        segundos_restantes = max(0, math.ceil((reintento - datetime.now(timezone.utc)).total_seconds()))
+        if segundos_restantes == 0:
+            estado = 'HALF_OPEN'
+
     return {
-        'estado_circuito': breaker.current_state.upper(),
+        'estado_circuito': estado,
+        'segundos_para_half_open': segundos_restantes,
         'fallos_consecutivos': breaker.fail_counter,
         'max_fallos': breaker.fail_max,
         'periodo_recuperacion': breaker.reset_timeout
