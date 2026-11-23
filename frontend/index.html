@@ -10,9 +10,15 @@
   </head>
   <body>
     <header class="encabezado">
-      <div class="contenedor">
-        <h1>Sistema Académico Distribuido</h1>
-        <p class="subtitulo">Gestión académica mediante microservicios</p>
+      <div class="contenedor encabezado-fila">
+        <div class="marca">
+          <span class="marca-logo">SA</span>
+          <div>
+            <h1>Sistema Académico Distribuido</h1>
+            <p class="subtitulo">Microservicios · API Gateway · PostgreSQL</p>
+          </div>
+        </div>
+        <p class="encabezado-badge">Corporacion Universitaria Unicomfacauca</p>
       </div>
     </header>
 
@@ -30,41 +36,97 @@
     <main class="contenedor">
       <div id="alerta" class="alerta oculta"></div>
 
-      <!-- INICIO -->
       <section id="vista-inicio" class="vista">
-        <h2>Módulos del sistema</h2>
-        <p class="intro">
-          Cada módulo se comunica con el API Gateway. El Gateway redirige la
-          petición al microservicio correspondiente.
+        <div class="hero">
+          <p class="etiqueta">Arquitectura de microservicios</p>
+          <h2>Gestión académica en un solo punto de acceso</h2>
+          <p class="intro">
+            El usuario entra por el frontend. Nginx, como API Gateway, recibe cada
+            petición y la envía al microservicio correcto. Cada servicio tiene su
+            propia base de datos PostgreSQL.
+          </p>
+        </div>
+
+        <div id="resumen" class="resumen"></div>
+
+        <h3 class="seccion-titulo">Flujo de la información</h3>
+        <div class="flujo">
+          <article class="flujo-paso">
+            <span>1</span>
+            <strong>Frontend</strong>
+            <p>Captura datos y usa fetch()</p>
+          </article>
+          <div class="flujo-flecha">→</div>
+          <article class="flujo-paso destacado">
+            <span>2</span>
+            <strong>API Gateway</strong>
+            <p>localhost:8000</p>
+          </article>
+          <div class="flujo-flecha">→</div>
+          <article class="flujo-paso">
+            <span>3</span>
+            <strong>Microservicio</strong>
+            <p>Valida y guarda</p>
+          </article>
+          <div class="flujo-flecha">→</div>
+          <article class="flujo-paso">
+            <span>4</span>
+            <strong>PostgreSQL</strong>
+            <p>Una BD por servicio</p>
+          </article>
+        </div>
+
+        <h3 class="seccion-titulo">Comunicación entre servicios</h3>
+        <p class="intro corto">
+          Antes de guardar, un servicio consulta a otro por HTTP. Así no se
+          registran referencias inexistentes.
         </p>
+        <ul class="relaciones">
+          <li><strong>Cursos → Docentes</strong> valida el docente_id</li>
+          <li><strong>Matrículas → Estudiantes</strong> valida el estudiante_id</li>
+          <li><strong>Matrículas → Cursos</strong> valida el curso_id</li>
+          <li><strong>Notas → Matrículas</strong> valida el matricula_id</li>
+        </ul>
+
+        <h3 class="seccion-titulo">Módulos</h3>
         <div class="tarjetas">
           <article class="tarjeta" data-vista="docentes">
+            <span class="tarjeta-icono">DO</span>
             <h3>Docentes</h3>
             <p>Gestión de docentes registrados en el sistema.</p>
           </article>
           <article class="tarjeta" data-vista="cursos">
+            <span class="tarjeta-icono">CU</span>
             <h3>Cursos</h3>
             <p>Administración de los cursos académicos.</p>
           </article>
           <article class="tarjeta" data-vista="estudiantes">
+            <span class="tarjeta-icono">ES</span>
             <h3>Estudiantes</h3>
             <p>Gestión de estudiantes.</p>
           </article>
           <article class="tarjeta" data-vista="matriculas">
+            <span class="tarjeta-icono">MA</span>
             <h3>Matrículas</h3>
             <p>Inscripción de estudiantes en cursos.</p>
           </article>
           <article class="tarjeta" data-vista="notas">
+            <span class="tarjeta-icono">NO</span>
             <h3>Notas</h3>
             <p>Registro de calificaciones.</p>
           </article>
         </div>
       </section>
 
-      <!-- DOCENTES -->
       <section id="vista-docentes" class="vista oculta">
-        <h2>Docentes</h2>
+        <div class="cabecera-modulo">
+          <div>
+            <h2>Docentes</h2>
+            <p>Registro del personal académico. Servicio independiente con su propia base de datos.</p>
+          </div>
+        </div>
         <form id="form-docente" class="formulario">
+          <p class="formulario-titulo">Registrar o actualizar docente</p>
           <input type="hidden" id="docente-id" />
           <label>Cédula<input type="text" id="docente-cedula" required /></label>
           <label>Nombre<input type="text" id="docente-nombre" required /></label>
@@ -102,10 +164,15 @@
         </div>
       </section>
 
-      <!-- CURSOS -->
       <section id="vista-cursos" class="vista oculta">
-        <h2>Cursos</h2>
+        <div class="cabecera-modulo">
+          <div>
+            <h2>Cursos</h2>
+            <p>Cada curso referencia un docente. El servicio consulta a Docentes antes de guardar.</p>
+          </div>
+        </div>
         <form id="form-curso" class="formulario">
+          <p class="formulario-titulo">Registrar o actualizar curso</p>
           <input type="hidden" id="curso-id" />
           <label>Código<input type="text" id="curso-codigo" required /></label>
           <label>Nombre<input type="text" id="curso-nombre" required /></label>
@@ -138,10 +205,15 @@
         </div>
       </section>
 
-      <!-- ESTUDIANTES -->
       <section id="vista-estudiantes" class="vista oculta">
-        <h2>Estudiantes</h2>
+        <div class="cabecera-modulo">
+          <div>
+            <h2>Estudiantes</h2>
+            <p>Información de quienes se matriculan en los cursos de la institución.</p>
+          </div>
+        </div>
         <form id="form-estudiante" class="formulario">
+          <p class="formulario-titulo">Registrar o actualizar estudiante</p>
           <input type="hidden" id="estudiante-id" />
           <label>Cédula<input type="text" id="estudiante-cedula" required /></label>
           <label>Nombre<input type="text" id="estudiante-nombre" required /></label>
@@ -169,10 +241,15 @@
         </div>
       </section>
 
-      <!-- MATRÍCULAS -->
       <section id="vista-matriculas" class="vista oculta">
-        <h2>Matrículas</h2>
+        <div class="cabecera-modulo">
+          <div>
+            <h2>Matrículas</h2>
+            <p>Une un estudiante con un curso. Valida ambos servicios antes de crear el registro.</p>
+          </div>
+        </div>
         <form id="form-matricula" class="formulario">
+          <p class="formulario-titulo">Registrar o actualizar matrícula</p>
           <input type="hidden" id="matricula-id" />
           <label>
             Estudiante
@@ -212,10 +289,15 @@
         </div>
       </section>
 
-      <!-- NOTAS -->
       <section id="vista-notas" class="vista oculta">
-        <h2>Notas</h2>
+        <div class="cabecera-modulo">
+          <div>
+            <h2>Notas</h2>
+            <p>Calificación asociada a una matrícula. Consulta Matrículas antes de guardar.</p>
+          </div>
+        </div>
         <form id="form-nota" class="formulario">
+          <p class="formulario-titulo">Registrar o actualizar nota</p>
           <input type="hidden" id="nota-id" />
           <label>
             Matrícula
@@ -246,11 +328,10 @@
     </main>
 
     <footer class="pie">
-      <p>Proyecto académico de Sistemas Distribuidos</p>
+      <p>Proyecto académico de Sistemas Distribuidos · Flask · PostgreSQL · Docker · Nginx</p>
     </footer>
 
     <script>
-      // Nginx sirve .css y .js como text/plain. Los cargamos como texto y los insertamos.
       (async function cargarRecursos() {
         const css = await fetch('css/styles.css').then(function (respuesta) {
           return respuesta.text();

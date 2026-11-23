@@ -41,6 +41,9 @@ function mostrarVista(nombre) {
 
   ocultarAlerta();
 
+  if (nombre === 'inicio') {
+    cargarResumen();
+  }
   if (nombre === 'docentes') {
     cargarDocentes();
   }
@@ -112,6 +115,36 @@ function textoOpcionVacia(texto) {
   return '<option value="">' + texto + '</option>';
 }
 
+function chip(texto) {
+  return '<span class="chip">' + texto + '</span>';
+}
+
+function chipNota(valor) {
+  const numero = Number(valor);
+  const clase = numero >= 3 ? 'chip nota-alta' : 'chip nota-baja';
+  return '<span class="' + clase + '">' + valor + '</span>';
+}
+
+async function cargarResumen() {
+  const docentes = await pedirAlGateway('/docentes');
+  const cursos = await pedirAlGateway('/cursos');
+  const estudiantes = await pedirAlGateway('/estudiantes');
+  const matriculas = await pedirAlGateway('/matriculas');
+  const notas = await pedirAlGateway('/notas');
+  const caja = document.getElementById('resumen');
+
+  function cantidad(resultado) {
+    return resultado.ok && resultado.datos ? resultado.datos.length : 0;
+  }
+
+  caja.innerHTML =
+    '<article class="dato"><strong>' + cantidad(docentes) + '</strong><span>Docentes</span></article>' +
+    '<article class="dato"><strong>' + cantidad(cursos) + '</strong><span>Cursos</span></article>' +
+    '<article class="dato"><strong>' + cantidad(estudiantes) + '</strong><span>Estudiantes</span></article>' +
+    '<article class="dato"><strong>' + cantidad(matriculas) + '</strong><span>Matrículas</span></article>' +
+    '<article class="dato"><strong>' + cantidad(notas) + '</strong><span>Notas</span></article>';
+}
+
 /* ---------- DOCENTES ---------- */
 
 async function cargarDocentes() {
@@ -137,7 +170,7 @@ function dibujarTablaDocentes(docentes) {
       '<td>' + docente.cedula + '</td>' +
       '<td>' + docente.nombre + '</td>' +
       '<td>' + docente.correo + '</td>' +
-      '<td>' + docente.departamento + '</td>' +
+      '<td>' + chip(docente.departamento) + '</td>' +
       '<td>' + (docente.genero || '') + '</td>' +
       '<td>' +
       '<button type="button" class="boton boton-pequeno" onclick="editarDocente(' + docente.id + ')">Editar</button>' +
@@ -259,7 +292,7 @@ function dibujarTablaCursos(cursos, docentes) {
       '<td>' + curso.nombre + '</td>' +
       '<td>' + curso.creditos + '</td>' +
       '<td>' + curso.semestre + '</td>' +
-      '<td>' + nombreDocente + '</td>' +
+      '<td>' + chip(nombreDocente) + '</td>' +
       '<td>' +
       '<button type="button" class="boton boton-pequeno" onclick="editarCurso(' + curso.id + ')">Editar</button>' +
       '<button type="button" class="boton boton-pequeno boton-peligro" onclick="eliminarCurso(' + curso.id + ')">Eliminar</button>' +
@@ -354,7 +387,7 @@ function dibujarTablaEstudiantes(estudiantes) {
       '<td>' + estudiante.cedula + '</td>' +
       '<td>' + estudiante.nombre + '</td>' +
       '<td>' + estudiante.correo + '</td>' +
-      '<td>' + estudiante.programa + '</td>' +
+      '<td>' + chip(estudiante.programa) + '</td>' +
       '<td>' +
       '<button type="button" class="boton boton-pequeno" onclick="editarEstudiante(' + estudiante.id + ')">Editar</button>' +
       '<button type="button" class="boton boton-pequeno boton-peligro" onclick="eliminarEstudiante(' + estudiante.id + ')">Eliminar</button>' +
@@ -626,7 +659,7 @@ function dibujarTablaNotas(notas, matriculas, estudiantes, cursos) {
       '<tr>' +
       '<td>' + nota.id + '</td>' +
       '<td>' + etiqueta + '</td>' +
-      '<td>' + nota.calificacion + '</td>' +
+      '<td>' + chipNota(nota.calificacion) + '</td>' +
       '<td>' + (nota.observacion || '') + '</td>' +
       '<td>' +
       '<button type="button" class="boton boton-pequeno" onclick="editarNota(' + nota.id + ')">Editar</button>' +
