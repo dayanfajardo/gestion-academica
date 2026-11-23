@@ -676,6 +676,11 @@ frontend/index.html
 ## Docker-compose
 El proyecto cuenta con un archivo `docker-compose.yml` que permite levantar todos los servicios y sus bases de datos de manera coordinada: 11 contenedores (gateway, 5 microservicios y 5 bases de datos), las variables de entorno leídas del archivo `.env`, los puertos y los volúmenes de persistencia.
 
+Antes de la primera ejecución se crea el archivo `.env` a partir de la plantilla y se completa `DB_PASSWORD`. El archivo `.env` no se sube a GitHub porque contiene credenciales.
+```bash
+cp .env.example .env
+```
+
 Para ejecutarlo se debe utilizar el comando:
 ```bash
 docker compose up -d --build
@@ -704,7 +709,7 @@ Los puertos de los servicios (`5001` a `5005`) y de las bases de datos (`15433` 
 
 ## Pruebas del sistema
 
-Matriz de verificación. Las pruebas se realizaron a través del gateway (`http://localhost:8000`) con datos propios del proyecto. Las capturas de las evidencias se guardan en [`docs/pruebas`](docs/pruebas).
+Matriz de verificación. Las pruebas se realizaron a través del gateway (`http://localhost:8000`) con datos propios del proyecto.
 
 | Prueba | Resultado esperado | Resultado obtenido |
 | --- | --- | --- |
