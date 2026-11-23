@@ -4,7 +4,8 @@ from src.services import (
     create_new_enrollment,
     fetch_enrollment_by_id,
     update_enrollment_by_id,
-    delete_enrollment_by_id
+    delete_enrollment_by_id,
+    fetch_circuit_status
 )
 
 matriculas_bp = Blueprint('matriculas', __name__)
@@ -70,5 +71,8 @@ def delete_enrollment(id):
     if not deleted:
         abort(404, description=f'La matricula con ID {id} no fue encontrada.')
     return jsonify({'mensaje': 'Matrícula eliminada correctamente', 'id':id}), 200
-    
-    
+
+#* Estado del circuit breaker hacia los servicios de los que depende
+@matriculas_bp.route('/matriculas/circuito', methods=['GET'])
+def get_circuit_status():
+    return jsonify(fetch_circuit_status()), 200

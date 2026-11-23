@@ -3,6 +3,8 @@ from flask import jsonify
 import psycopg2.errors
 import psycopg2
 
+from src.resilience import DependencyError
+
 def register_error_handlers(app):
     
     #  Errores específicos de Postgres
@@ -31,6 +33,15 @@ def register_error_handlers(app):
             'status': 500
         }), 500
     
+    # Fallas al comunicarse con otros microservicios (timeout / circuit breaker)
+    @app.errorhandler(DependencyError)
+    def handle_dependency_error(e):
+        return jsonify({
+            'error': 'Service Unavailable' if e.status == 503 else ('Gateway Timeout' if e.status == 504 else 'Bad Gateway'),
+            'message': e.message,
+            'status': e.status
+        }), e.status
+
     # Excepciones HTTP de Flask 
     @app.errorhandler(HTTPException)
     def handle_http_exception(e):

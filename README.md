@@ -415,6 +415,40 @@ Como medidas de manejo se propone:
 - Utilizar **timeouts** para evitar peticiones bloqueadas indefinidamente.
 - Retornar códigos HTTP adecuados ante fallas controladas.
 
+### Timeout y Circuit Breaker
+
+Las llamadas síncronas entre servicios están protegidas con **timeout** y **circuit breaker** (librería [`pybreaker`](https://pypi.org/project/pybreaker/)), implementados en `src/resilience.py` de cada servicio consumidor:
+
+| Servicio consumidor | Servicio consultado | Circuito |
+| --- | --- | --- |
+| Cursos | Docentes | `docentes` |
+| Matrículas | Estudiantes y Cursos | `estudiantes`, `cursos` (independientes) |
+| Notas | Matrículas | `matriculas` |
+
+Funcionamiento:
+
+- Cada petición tiene un tiempo máximo de espera (`<SERVICIO>_TIMEOUT`).
+- Los timeouts, errores de conexión y respuestas **5xx** cuentan como fallo. Un **404** no cuenta (es una respuesta válida: el recurso no existe).
+- Tras `CB_MAX_FALLOS` fallos consecutivos el circuito pasa a **OPEN** y las peticiones se rechazan de inmediato sin consultar al servicio caído.
+- Pasados `CB_RECUPERACION` segundos el circuito pasa a **HALF-OPEN**: la siguiente petición se deja pasar; si tiene éxito el circuito vuelve a **CLOSED**, si falla vuelve a **OPEN**.
+
+Respuestas ante fallas del servicio consultado:
+
+| Situación | Código HTTP |
+| --- | --- |
+| Circuito abierto | `503 Service Unavailable` |
+| Tiempo de espera agotado | `504 Gateway Timeout` |
+| No se pudo conectar | `503 Service Unavailable` |
+| El servicio respondió 5xx | `502 Bad Gateway` |
+
+Estado de los circuitos (también accesible a través del gateway en el puerto 8000):
+
+- `GET /cursos/circuito`
+- `GET /matriculas/circuito`
+- `GET /notas/circuito`
+
+Para probarlo: detener un servicio (por ejemplo `docker compose stop docentes-service`), intentar crear un curso varias veces y consultar `GET /cursos/circuito` para ver el circuito en estado `OPEN`.
+
 ### Fallas en la base de datos
 
 Una falla o pérdida de información en una base de datos puede generar inconsistencias debido a las referencias lógicas existentes entre los distintos servicios.
@@ -447,6 +481,12 @@ Una falla o pérdida de información en una base de datos puede generar inconsis
 | `ESTUDIANTES_SERVICE_URL` | URL del servicio estudiantes para la comunicación con otros servicios  |
 | `MATRICULAS_SERVICE_URL` |  URL del servicio matriculas para la comunicación con otros servicios |
 | `NOTAS_SERVICE_URL` |  URL del servicio notas para la comunicación con otros servicios |
+| `DOCENTES_TIMEOUT` | Segundos máximos de espera al consultar Docentes (usado por Cursos) |
+| `CURSOS_TIMEOUT` | Segundos máximos de espera al consultar Cursos (usado por Matrículas) |
+| `ESTUDIANTES_TIMEOUT` | Segundos máximos de espera al consultar Estudiantes (usado por Matrículas) |
+| `MATRICULAS_TIMEOUT` | Segundos máximos de espera al consultar Matrículas (usado por Notas) |
+| `CB_MAX_FALLOS` | Fallos consecutivos para abrir el circuit breaker |
+| `CB_RECUPERACION` | Segundos que el circuito permanece abierto antes de volver a intentar |
 
 
 
