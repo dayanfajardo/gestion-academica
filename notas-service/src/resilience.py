@@ -36,11 +36,6 @@ def create_breaker(name):
 
 
 def call_service(breaker, service_name, url, timeout):
-    """
-    Hace un GET a otro servicio protegido por timeout y circuit breaker.
-    Solo los errores de red y las respuestas 5xx cuentan como fallo del circuito;
-    un 404 es una respuesta válida y se devuelve al llamador.
-    """
     try:
         with breaker.calling():
             response = requests.get(url, timeout=timeout)
@@ -63,12 +58,6 @@ def call_service(breaker, service_name, url, timeout):
 
 
 def breaker_status(breaker):
-    """
-    Estado actual del circuito, para el endpoint de monitoreo.
-    pybreaker solo pasa de OPEN a HALF_OPEN cuando llega una petición, así que
-    si ya pasó el periodo de recuperación se informa HALF_OPEN: la siguiente
-    petición será la de prueba.
-    """
     estado = breaker.current_state.upper().replace('-', '_')
     segundos_restantes = 0
     opened_at = breaker._state_storage.opened_at
